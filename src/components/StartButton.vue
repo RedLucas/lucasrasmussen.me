@@ -35,7 +35,7 @@ export default {
     img {
       height: auto;
       width: 27px;
-      background-color: white;
+      background-color: #FFE3A6;
       border-radius: 50%;
       transition: 0.25s box-shadow linear;
       box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
@@ -63,57 +63,6 @@ li {
 
 a {
   color: #42b983;
-}
-
-.wiggle {
-  animation-duration: 500ms;
-  animation-name: wiggle-7deg;
-}
-
-@-webkit-keyframes wiggle-7deg {
-  40%,
-  50%,
-  60% {
-    -webkit-transform: rotate(7deg);
-    transform: rotate(7deg);
-  }
-  35%,
-  45%,
-  55%,
-  65% {
-    -webkit-transform: rotate(-7deg);
-    transform: rotate(-7deg);
-  }
-  0%,
-  30%,
-  70%,
-  100% {
-    -webkit-transform: rotate(0);
-    transform: rotate(0);
-  }
-}
-
-@keyframes wiggle-7deg {
-  40%,
-  50%,
-  60% {
-    -webkit-transform: rotate(7deg);
-    transform: rotate(7deg);
-  }
-  35%,
-  45%,
-  55%,
-  65% {
-    -webkit-transform: rotate(-7deg);
-    transform: rotate(-7deg);
-  }
-  0%,
-  30%,
-  70%,
-  100% {
-    -webkit-transform: rotate(0);
-    transform: rotate(0);
-  }
 }
 
 </style>

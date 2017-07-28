@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Unsplash-bg></Unsplash-bg>
-    <img :class="{'wiggle': logo.wiggle}" src="./assets/img/lucasrasmussen-logo.svg">
+    <img :class="{'wiggle': logo.wiggle, 'pulser': logo.pulser}" src="./assets/img/lucasrasmussen-logo.svg">
     <router-view></router-view>
     <start-menu></start-menu>
   </div>
@@ -35,7 +35,7 @@ export default {
     return {
       logo: {
         wiggle: false,
-        pulse: false,
+        pulser: true,
       },
     };
   },
@@ -62,6 +62,53 @@ export default {
     background: white;
     position: relative;
     z-index: 1;
+    transition: background-color 0.5s linear;
+  }
+}
+.wiggle {
+  animation-duration: 500ms;
+  animation-name: wiggle-7deg;
+}
+
+.pulser {
+  transition: background-color 0.5s linear;
+  animation-name: pulser;
+  animation-duration: 5000ms;
+  animation-iteration-count: infinite;
+}
+
+@keyframes wiggle-7deg {
+  40%,
+  50%,
+  60% {
+    -webkit-transform: rotate(7deg);
+    transform: rotate(7deg);
+  }
+  35%,
+  45%,
+  55%,
+  65% {
+    -webkit-transform: rotate(-7deg);
+    transform: rotate(-7deg);
+  }
+  0%,
+  30%,
+  70%,
+  100% {
+    -webkit-transform: rotate(0);
+    transform: rotate(0);
+  }
+}
+
+@keyframes pulser {
+  0% {
+    background-color: white;
+  }
+  55% {
+    background-color: #FFE3A6;
+  }
+  100% {
+    background-color: white;
   }
 }
 </style>
