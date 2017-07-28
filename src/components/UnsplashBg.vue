@@ -24,15 +24,22 @@ export default {
   },
   mounted() {
     const vm = this;
+    let imgCache = window.localStorage.getItem('lucas-unsplash');
+    if (imgCache) {
+      this.imgSrc = imgCache;
+      return;
+    }
     let promise = this.unsplash.photos.getRandomPhoto();
     promise
       .then(res => res.json())
       .then(function(value){
         let image = new Image();
+        let url = value.urls.full;
         image.onload = () => {
-          vm.imgSrc = value.urls.full;
+          window.localStorage.setItem('lucas-unsplash', url);
+          vm.imgSrc = url;
         }
-        image.src = value.urls.full;
+        image.src = url;
       });
   },
 };

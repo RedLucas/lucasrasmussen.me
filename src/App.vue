@@ -43,7 +43,6 @@ export default {
 </script>
 
 <style lang="scss">
-/* @import 'motion-ui/motion-ui.scss'; */
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -63,6 +62,8 @@ export default {
     position: relative;
     z-index: 1;
     transition: background-color 0.5s linear;
+    min-width: 100px;
+    max-width: 30%;
   }
 }
 .wiggle {
@@ -75,6 +76,10 @@ export default {
   animation-name: pulser;
   animation-duration: 5000ms;
   animation-iteration-count: infinite;
+}
+
+.wiggle.pulser {
+  animation: pulser 5000ms infinite, wiggle-7deg 500ms;
 }
 
 @keyframes wiggle-7deg {
