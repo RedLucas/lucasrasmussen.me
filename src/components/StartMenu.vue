@@ -1,12 +1,17 @@
 <template>
   <div class="start">
-
+     <start-button></start-button>
   </div>
 </template>
 
 <script>
+import StartButton from './StartButton';
+
 export default {
   name: 'start-menu',
+  components: {
+    'start-button': StartButton,
+  },
   data() {
     return {
       msg: 'Welcome to Your Vue.js App',
@@ -24,5 +29,7 @@ export default {
   left: 0;
   right: 0;
   background: linear-gradient(to bottom, rgb(47, 47, 47)  0%,#000000 100%);
+  display: flex;
+
 }
 </style>

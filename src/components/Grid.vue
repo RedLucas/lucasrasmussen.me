@@ -1,5 +1,5 @@
 <template>
-  <div class="grid">
+  <div v-if="grid" class="grid">
     <div v-for="theme in themes" :key="theme.name">{{theme.name}}</div>
   </div>
 </template>
@@ -9,15 +9,16 @@ export default {
   name: 'grid',
   data() {
     return {
+      grid: false,
       themes: [
         {
-          name: 'this',
+          name: '',
         },
         {
-          name: 'this2',
+          name: '',
         },
         {
-          name: 'this3',
+          name: '',
         },
       ],
     };

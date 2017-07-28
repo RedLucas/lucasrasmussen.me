@@ -1,5 +1,7 @@
 <template>
-  <div v-if="imgSrc" :style="{backgroundImage: imgSrc}" class="unsplash-bg"></div>
+  <transition name="fade">
+  <div v-if="imgSrc" v-bind:style="{backgroundImage: 'url(' + imgSrc + ')'}" class="unsplash-bg"></div>
+  </transition>
 </template>
 
 <script>
@@ -17,15 +19,21 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App',
       unsplash,
-      imgSrc: false,
+      imgSrc: '',
     };
   },
   mounted() {
     const vm = this;
-    this.unsplash.photos.getRandomPhoto().then(function (response) {
-      vm.imgSrc = response.url;
-    });
-    /* eslint-disable */
+    let promise = this.unsplash.photos.getRandomPhoto();
+    promise
+      .then(res => res.json())
+      .then(function(value){
+        let image = new Image();
+        image.onload = () => {
+          vm.imgSrc = value.urls.full;
+        }
+        image.src = value.urls.full;
+      });
   },
 };
 </script>
@@ -39,5 +47,11 @@ export default {
     bottom: 0;
     left: 0;
     background-size: cover;
+  }
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity 1.5s
+  }
+  .fade-enter, .fade-leave-to {
+    opacity: 0
   }
 </style>
