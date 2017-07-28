@@ -26,18 +26,22 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style  lang="scss">
-.startmenu__button.logo {
+.startmenu__button {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  img {
-    height: auto;
-    width: 30px;
-    background-color: white;
-    border-radius: 50%;
-    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
-    &:hover {
-      box-shadow: inset 0px 0px 42px 0px rgba(0, 0, 0, 0.75);
+  padding: 0px 10px;
+  &.logo{
+    img {
+      height: auto;
+      width: 27px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.25s box-shadow linear;
+      box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+      &:hover {
+        box-shadow: inset 0px 0px 42px 0px rgba(0, 0, 0, 0.75);
+      }
     }
   }
 }
