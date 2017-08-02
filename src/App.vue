@@ -1,7 +1,14 @@
 <template>
   <div id="app">
     <Unsplash-bg></Unsplash-bg>
-    <img :class="{'wiggle': logo.wiggle, 'pulser': logo.pulser}" src="./assets/img/lucasrasmussen-logo.svg">
+    <div :class="{'modal': true, 'logo': !resume, 'resume': resume}">
+      <transition name="fade">
+        <img v-if="!resumeUrl" :class="{'wiggle': logo.wiggle, 'pulser': logo.pulser}" src="./assets/img/lucasrasmussen-logo.svg">
+      </transition>
+      <transition name="fade">
+        <iframe @load="showResume" v-if="resumeUrl" v-show="resumeReady" :src="resumeUrl + '?theme=flat'"></iframe>
+      </transition>
+    </div>
     <router-view></router-view>
     <start-menu></start-menu>
   </div>
@@ -18,17 +25,29 @@ export default {
     UnsplashBg,
   },
   methods: {
+    showResume() {
+      this.resumeReady = true;
+    },
     wiggleOff() {
       this.logo.wiggle = false;
     },
     toggleWiggle() {
       const vm = this;
-      function toggleWiggle() {
+      function toggledWiggle() {
         vm.logo.wiggle = !vm.logo.wiggle;
-        vm.$el.removeEventListener('animationend', toggleWiggle);
+        vm.$el.removeEventListener('animationend', toggledWiggle);
       }
-      vm.$el.addEventListener('animationend', toggleWiggle);
+      vm.$el.addEventListener('animationend', toggledWiggle);
       vm.logo.wiggle = !vm.logo.wiggle;
+    },
+    toggleResume() {
+      const vm = this;
+      function toggledResume() {
+        vm.resumeUrl = vm.$parent.resumeUrl;
+        vm.$el.removeEventListener('transitionend', toggledResume);
+      }
+      vm.$el.addEventListener('transitionend', toggledResume);
+      this.resume = !this.resume;
     },
   },
   data() {
@@ -37,12 +56,16 @@ export default {
         wiggle: false,
         pulser: true,
       },
+      resume: false,
+      resumeUrl: false,
+      resumeReady: false,
     };
   },
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
+$popup-background: white;
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -50,21 +73,50 @@ export default {
   text-align: center;
   color: #2c3e50;
   display: flex;
-  align-content: center;
+  align-items: center;
   justify-content: center;
   height: 100vh;
   background: linear-gradient(to right, #e44d26, #f16529);
-  > img {
-    align-self: center;
-    box-shadow: 0px 0px 42px 0px rgba(0,0,0,0.75), inset 0px 0px 5px 0px rgba(0,0,0,0.75);
-    border-radius: 50%;
-    background: white;
-    position: relative;
-    z-index: 1;
-    transition: background-color 0.5s linear;
-    min-width: 100px;
-    max-width: 30%;
+}
+.modal {
+  background: $popup-background;
+  transition: all 0.5s linear;
+  box-shadow: 0px 0px 42px 0px rgba(0,0,0,0.75), inset 0px 0px 5px 0px rgba(0,0,0,0.75);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  > iframe {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
   }
+  > img {
+    border-radius: 50%;
+  }
+}
+.logo {
+  transition: background-color 0.5s linear;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  > img {
+    transition: background-color 0.5s linear;
+    width: 100%;
+    height: auto;
+  }
+}
+.resume {
+  border-radius: 15px;
+  min-width: 80vw;
+  max-width: 100%;
+  min-height: 80vh;
 }
 .wiggle {
   animation-duration: 500ms;
@@ -72,7 +124,6 @@ export default {
 }
 
 .pulser {
-  transition: background-color 0.5s linear;
   animation-name: pulser;
   animation-duration: 5000ms;
   animation-iteration-count: infinite;

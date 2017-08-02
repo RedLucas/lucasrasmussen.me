@@ -5206,6 +5206,10 @@ pngjs@^3.0.0, pngjs@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.2.0.tgz#fc9fcea1a8a375da54a51148019d5abd41dbabde"
 
+popper.js@^1.0.2:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.11.1.tgz#f5aca9a73bca1ce1fdbd9be8b1ba68677cbdd8e0"
+
 postcss-apply@^0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/postcss-apply/-/postcss-apply-0.8.0.tgz#14e544bbb5cb6f1c1e048857965d79ae066b1343"
@@ -6845,6 +6849,12 @@ to-ico@^1.1.2:
     parse-png "^1.0.0"
     resize-img "^1.1.0"
 
+tooltip.js@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/tooltip.js/-/tooltip.js-1.1.4.tgz#17337f22065fc04d4a456429ce122dbf184bd861"
+  dependencies:
+    popper.js "^1.0.2"
+
 toposort@^1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/toposort/-/toposort-1.0.3.tgz#f02cd8a74bd8be2fc0e98611c3bacb95a171869c"
@@ -7071,6 +7081,12 @@ utils-merge@1.0.0:
 uuid@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
+
+v-tooltip@^2.0.0-beta.8:
+  version "2.0.0-beta.8"
+  resolved "https://registry.yarnpkg.com/v-tooltip/-/v-tooltip-2.0.0-beta.8.tgz#e69adab542d64f211d78acb4679b74622929bebc"
+  dependencies:
+    tooltip.js "^1.1.4"
 
 validate-npm-package-license@^3.0.1:
   version "3.0.1"

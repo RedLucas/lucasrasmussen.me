@@ -2,9 +2,11 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import VueResource from 'vue-resource';
+import VTooltip from 'v-tooltip';
 import App from './App';
 import router from './router';
 
+Vue.use(VTooltip);
 Vue.use(VueResource);
 
 Vue.config.productionTip = false;
@@ -18,6 +20,7 @@ new Vue({
   data() {
     return {
       resume: {},
+      resumeUrl: '//registry.jsonresume.org/redlucas',
     };
   },
   mounted() {
@@ -26,9 +29,8 @@ new Vue({
       this.resume = resume;
       return;
     }
-    resume = this.$resource('//registry.jsonresume.org/redlucas.json');
-    /* eslint-disable */
-    resume.get().then(response => {
+    resume = this.$resource(`${this.resumeUrl}.json`);
+    resume.get().then((response) => {
       this.resume = response.body;
       window.localStorage.setItem('lucas-resume', JSON.stringify(response.body));
     });
