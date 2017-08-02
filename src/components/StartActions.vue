@@ -26,6 +26,7 @@ export default {
     },
     clearCache() {
       window.localStorage.clear();
+      window.location.reload();
     },
   },
 };
