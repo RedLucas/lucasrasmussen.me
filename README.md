@@ -1,5 +1,7 @@
 # lucasrasmussen.me
 
+[![CircleCI](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/master.svg?style=svg)](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/master)
+
 > A Vue.js project
 
 ## Build Setup
