@@ -47,7 +47,7 @@ export default {
         vm.$el.removeEventListener('transitionend', toggledResume);
       }
       vm.$el.addEventListener('transitionend', toggledResume);
-      this.resume = !this.resume;
+      this.resume = true;
     },
   },
   data() {
@@ -88,14 +88,15 @@ $popup-background: white;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  > iframe {
+  iframe {
     position: absolute;
+    top: 0;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
-    top: 0;
     width: 100%;
     height: 100%;
+    border: none;
   }
   > img {
     border-radius: 50%;
