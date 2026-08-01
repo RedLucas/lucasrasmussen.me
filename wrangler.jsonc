@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Alphanumeric + dashes only — this is the Worker's name, not the domain.
+  "name": "lucasrasmussen-me",
+  "compatibility_date": "2026-08-01",
+
+  // This is a static SPA with no server-side Worker code, so there is no
+  // `main` entrypoint — Cloudflare's asset server handles every request
+  // directly from the Vite build output.
+  "assets": {
+    "directory": "./dist",
+    // react-router owns client-side routing. Without this, a hard refresh
+    // on any route other than "/" would 404 at the edge before React ever
+    // loads; this falls back to index.html for any unmatched path instead.
+    "not_found_handling": "single-page-application"
+  },
+
+  // Attaching these here (rather than only in the dashboard) means the
+  // domain routes to this Worker automatically on every deploy, and
+  // Cloudflare provisions/updates the DNS record for it since the zone is
+  // already on Cloudflare. Drop the "www" entry if that subdomain is never
+  // going to be used.
+  "routes": [
+    { "pattern": "lucasrasmussen.me", "custom_domain": true },
+    { "pattern": "www.lucasrasmussen.me", "custom_domain": true }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+}

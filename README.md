@@ -23,6 +23,21 @@ npm run preview
 npm run lint
 ```
 
+## Deploy
+
+The site deploys to Cloudflare Workers as static assets — there is no
+server-side Worker code, `wrangler.jsonc` just points at the Vite build
+output:
+
+``` bash
+npm run deploy
+```
+
+which builds and then runs `wrangler deploy`. That requires being logged in
+locally (`npx wrangler login`); in CI, Cloudflare Workers Builds runs the same
+build/deploy commands with the account context already in place — see the
+project setup notes for the one-time dashboard configuration.
+
 ## Background
 
 The background is a WebGL fragment shader that draws a procedural sunset
