@@ -1,12 +1,12 @@
 # lucasrasmussen.me
 
-[![CircleCI](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/main.svg?style=svg)](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/main)
+[![CI](https://github.com/RedLucas/lucasrasmussen.me/actions/workflows/ci.yml/badge.svg)](https://github.com/RedLucas/lucasrasmussen.me/actions/workflows/ci.yml)
 
 > A React + Vite project
 
 ## Build Setup
 
-``` bash
+```bash
 # install dependencies
 npm install
 
@@ -29,7 +29,7 @@ The site deploys to Cloudflare Workers as static assets — there is no
 server-side Worker code, `wrangler.jsonc` just points at the Vite build
 output:
 
-``` bash
+```bash
 npm run deploy
 ```
 

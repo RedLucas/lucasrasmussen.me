@@ -12,7 +12,7 @@
     // react-router owns client-side routing. Without this, a hard refresh
     // on any route other than "/" would 404 at the edge before React ever
     // loads; this falls back to index.html for any unmatched path instead.
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
   },
 
   // Attaching these here (rather than only in the dashboard) means the
@@ -22,10 +22,10 @@
   // going to be used.
   "routes": [
     { "pattern": "lucasrasmussen.me", "custom_domain": true },
-    { "pattern": "www.lucasrasmussen.me", "custom_domain": true }
+    { "pattern": "www.lucasrasmussen.me", "custom_domain": true },
   ],
 
   "observability": {
-    "enabled": true
-  }
+    "enabled": true,
+  },
 }

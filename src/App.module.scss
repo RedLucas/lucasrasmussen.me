@@ -16,7 +16,9 @@
 .modal {
   background: $popup-background;
   transition: all 0.5s linear;
-  box-shadow: 0 0 42px 0 rgba(0, 0, 0, 0.75), inset 0 0 5px 0 rgba(0, 0, 0, 0.75);
+  box-shadow:
+    0 0 42px 0 rgba(0, 0, 0, 0.75),
+    inset 0 0 5px 0 rgba(0, 0, 0, 0.75);
   position: relative;
   z-index: 1;
   display: flex;
