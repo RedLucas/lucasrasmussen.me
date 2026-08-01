@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
-import type { IconType } from 'react-icons';
+import { useMemo, type ReactNode } from 'react';
 import { getSceneSeed } from '../seed';
 import styles from './Creature.module.scss';
+import type { CreatureSvgProps } from './creatures/types';
 
-export type CreatureMotion = 'flap' | 'bob' | 'undulate';
+type CreatureComponent = (props: CreatureSvgProps) => ReactNode;
 
 export interface CreatureProps {
-  Normal: IconType;
-  Alien: IconType;
+  Normal: CreatureComponent;
+  Alien: CreatureComponent;
   normalColor: string;
   alienColor: string;
   spaceMode: boolean;
@@ -18,18 +18,23 @@ export interface CreatureProps {
   // aurora well above it) need the alien variant somewhere else entirely.
   alienTop?: string;
   duration: number;
-  motion: CreatureMotion;
-  // Defaults to `motion` — most pairs share a gait, but a few (e.g. a
-  // walking camel cross-fading to an undulating sandworm) need their own.
-  alienMotion?: CreatureMotion;
+  // Whether this variant drifts a little in altitude/current on its own,
+  // independent of its gait (see the `.wander` comment in the stylesheet).
+  // Defaults to true — most creatures are airborne or aquatic. Ground
+  // walkers (a camel, a bear) need this off, since they have to stay
+  // pinned to the terrain line they're walking along rather than floating.
+  wander?: boolean;
+  // Defaults to `wander` — needed when the two variants differ (a grounded
+  // bear cross-fading to a gliding manta).
+  alienWander?: boolean;
   reverse?: boolean;
   mirrored?: boolean;
   glow?: boolean;
 }
 
-// A small vector silhouette (from react-icons' game-icons collection —
-// professionally drawn and immediately recognizable, unlike a hand-rolled
-// shader silhouette) drifting across its theme, cross-fading to an alien
+// A small rigged SVG creature (see ./creatures — a static body plus a
+// handful of separately-animated parts, each pivoting from its own hip/
+// shoulder/tail-base) drifting across its theme, cross-fading to an alien
 // counterpart in space mode exactly like every other space-mode element in
 // these scenes. Positioned as a plain DOM overlay above the WebGL canvas
 // rather than drawn inside the shader — there's no way to sample the
@@ -37,14 +42,13 @@ export interface CreatureProps {
 // creatures sit at a fixed height near the horizon rather than tracking the
 // exact procedural ridge silhouette underneath them.
 //
-// Normal and Alien each get their own independent, fully-positioned track
-// rather than sharing one parent — a nested "position within a position"
-// would need the alien variant's own `top` to resolve as a percentage of
-// its wrapper's height, but that wrapper's height collapses to 0 once its
-// own children are absolutely positioned. Two independent tracks sidestep
-// that entirely, and since both use the exact same animation-duration/delay,
-// they move in perfect horizontal lockstep — it still reads as one creature
-// cross-fading in place, not two drifting independently.
+// Only two motion layers live here: `.track` drives horizontal drift
+// (`left`/`right`, not `transform`), and an optional `.wander` wrapper
+// drifts vertically on its own slow timescale for airborne/aquatic
+// creatures. The actual gait (leg/wing/fin articulation) is internal to
+// each creature component now, not applied externally — a single flat icon
+// could only wobble as one rigid shape, but a multi-part rig needs each
+// part animating independently, which has to live inside the SVG itself.
 export default function Creature({
   Normal,
   Alien,
@@ -55,17 +59,25 @@ export default function Creature({
   top,
   alienTop,
   duration,
-  motion,
-  alienMotion,
+  wander = true,
+  alienWander,
   reverse = false,
   mirrored = false,
   glow = false,
 }: CreatureProps) {
-  // A negative animation-delay starts the loop partway through instead of
-  // at its beginning, so creatures don't all sync to the same phase — the
-  // one stable per-session seed already used for the procedural scenes
-  // gives each creature its own offset without a fresh RNG call per render.
+  // Negative animation-delays start each loop partway through instead of at
+  // its beginning, so creatures (and their independent wander drift) don't
+  // all sync to the same phase — the one stable per-session seed already
+  // used for the procedural scenes gives each its own offset without a
+  // fresh RNG call per render. The wander delay/duration use different
+  // multipliers than the drift delay so the two motions stay decorrelated
+  // rather than lining up into one bigger, still-mechanical-looking cycle.
   const delay = useMemo(() => -((getSceneSeed() * 37 + duration) % duration), [duration]);
+  const wanderDuration = useMemo(() => 5 + ((getSceneSeed() * 71) % 3), []);
+  const wanderDelay = useMemo(
+    () => -((getSceneSeed() * 113 + wanderDuration) % wanderDuration),
+    [wanderDuration],
+  );
 
   const flipStyle = mirrored ? { transform: 'scaleX(-1)' } : undefined;
   // A tight blur: at these icon sizes (~35-45px) anything wider reads as a
@@ -77,6 +89,13 @@ export default function Creature({
   const trackClass = `${styles.track} ${reverse ? styles.reverse : ''}`;
   const animationDuration = `${duration}s`;
   const animationDelay = `${delay}s`;
+  const wanderStyle = {
+    animationDuration: `${wanderDuration}s`,
+    animationDelay: `${wanderDelay}s`,
+  };
+
+  const normalWander = wander;
+  const alienWanderResolved = alienWander ?? wander;
 
   return (
     <>
@@ -92,9 +111,13 @@ export default function Creature({
           animationDelay,
         }}
       >
-        <div className={`${styles.icon} ${styles[motion]}`}>
+        {normalWander ? (
+          <div className={styles.wander} style={wanderStyle}>
+            <Normal size={size} color={normalColor} style={flipStyle} />
+          </div>
+        ) : (
           <Normal size={size} color={normalColor} style={flipStyle} />
-        </div>
+        )}
       </div>
       <div
         className={trackClass}
@@ -108,9 +131,13 @@ export default function Creature({
           animationDelay,
         }}
       >
-        <div className={`${styles.icon} ${styles[alienMotion ?? motion]}`}>
+        {alienWanderResolved ? (
+          <div className={styles.wander} style={wanderStyle}>
+            <Alien size={size} color={alienColor} style={alienFlipStyle} />
+          </div>
+        ) : (
           <Alien size={size} color={alienColor} style={alienFlipStyle} />
-        </div>
+        )}
       </div>
     </>
   );

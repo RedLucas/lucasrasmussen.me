@@ -1,11 +1,15 @@
 import { useEffect, useRef } from 'react';
-import { GiSchoolOfFish, GiSquid, GiSpermWhale, GiJellyfish } from 'react-icons/gi';
 import vertSource from '../shaders/landscape.vert?raw';
 import commonSource from '../shaders/common.glsl?raw';
 import themeFragSource from '../shaders/ocean.frag?raw';
 import { createSpaceRamp } from '../spaceRamp';
 import { getSceneSeed } from '../seed';
 import Creature from './Creature';
+import FishSchool from './creatures/FishSchool';
+import Squid from './creatures/Squid';
+import Whale from './creatures/Whale';
+import Jellyfish from './creatures/Jellyfish';
+import WaveOverlay from './WaveOverlay';
 import styles from './LandscapeBg.module.scss';
 import type { BackgroundThemeComponentProps } from '../backgrounds';
 
@@ -175,31 +179,34 @@ export default function OceanBg({ spaceMode = false }: BackgroundThemeComponentP
     <>
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
       <Creature
-        Normal={GiSchoolOfFish}
-        Alien={GiSquid}
+        Normal={FishSchool}
+        Alien={Squid}
         normalColor="#7fa8b8"
         alienColor="#73f2e6"
         spaceMode={spaceMode}
         size={34}
         top="58%"
         duration={30}
-        motion="undulate"
         glow
       />
       <Creature
-        Normal={GiSpermWhale}
-        Alien={GiJellyfish}
+        Normal={Whale}
+        Alien={Jellyfish}
         normalColor="#3d5a68"
         alienColor="#a888ff"
         spaceMode={spaceMode}
         size={46}
         top="66%"
         duration={44}
-        motion="bob"
-        alienMotion="undulate"
         reverse
         glow
       />
+      {/* Foreground wave crests, drawn on top of the fish/whale so they
+          read as swimming beneath the surface texture rather than in
+          front of it — see WaveOverlay's own comment for why the shader's
+          own foam crests can't provide this on their own. */}
+      <WaveOverlay top="57%" />
+      <WaveOverlay top="65%" />
     </>
   );
 }

@@ -1,0 +1,33 @@
+// A thin foreground wave crest, drawn as a plain DOM overlay so it always
+// renders in front of any creature at the same height — the ocean shader's
+// own foam crests are baked into the canvas below every DOM element, so a
+// fish swimming at that height was always drawn on top of the crest line
+// it should be passing behind. This doesn't try to track the shader's
+// procedural wave shape exactly (that would mean duplicating its noise
+// function in JS/CSS) — a gentle drifting sine reads as "a ripple in front"
+// well enough for a decorative background.
+.wave {
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  height: 22px;
+  pointer-events: none;
+  animation: drift 14s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(2%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave {
+    animation: none;
+  }
+}

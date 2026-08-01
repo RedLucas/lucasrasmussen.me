@@ -1,8 +1,9 @@
 // Normal and Alien each get their own independently positioned/animated
 // track (see Creature.tsx's own comment for why), sized and placed via
 // inline style. `left`/`right` drive horizontal drift here specifically so
-// the gait animation below is free to animate `transform` on its own nested
-// element without the two ever fighting over the same property.
+// the wander animation below (and each creature's own internal gait rig)
+// is free to animate `transform` on its own element without ever fighting
+// the drift for the same property.
 .track {
   position: absolute;
   left: -18%;
@@ -37,64 +38,34 @@
   }
 }
 
-.icon {
+// A slow, independent altitude/current drift for airborne and aquatic
+// creatures — real flight and swimming paths wander a little on their own
+// timescale, layered underneath each creature's own gait rig rather than
+// moving in a dead-straight line. Grounded walkers skip this wrapper
+// entirely (see Creature.tsx) since they need to stay pinned to the terrain
+// line they're walking along.
+.wander {
   width: 100%;
   height: 100%;
+  animation-name: wander;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
 }
 
-.flap {
-  animation: flap 0.7s ease-in-out infinite;
-}
-
-.bob {
-  animation: bob 1.6s ease-in-out infinite;
-}
-
-.undulate {
-  animation: undulate 2.4s ease-in-out infinite;
-}
-
-@keyframes flap {
-  0%,
-  100% {
-    transform: scaleY(1) rotate(0deg);
-  }
-
-  50% {
-    transform: scaleY(0.82) rotate(-4deg);
-  }
-}
-
-@keyframes bob {
+@keyframes wander {
   0%,
   100% {
     transform: translateY(0);
   }
 
   50% {
-    transform: translateY(-8%);
-  }
-}
-
-@keyframes undulate {
-  0%,
-  100% {
-    transform: rotate(-5deg);
-  }
-
-  50% {
-    transform: rotate(5deg);
+    transform: translateY(-6%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .track {
-    animation: none;
-  }
-
-  .flap,
-  .bob,
-  .undulate {
+  .track,
+  .wander {
     animation: none;
   }
 }

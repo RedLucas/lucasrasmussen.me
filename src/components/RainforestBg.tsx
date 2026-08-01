@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { GiPeaceDove, GiButterfly } from 'react-icons/gi';
 import vertSource from '../shaders/landscape.vert?raw';
 import commonSource from '../shaders/common.glsl?raw';
 import themeFragSource from '../shaders/rainforest.frag?raw';
 import { createSpaceRamp } from '../spaceRamp';
 import { getSceneSeed } from '../seed';
 import Creature from './Creature';
+import Dove from './creatures/Dove';
+import Butterfly from './creatures/Butterfly';
 import styles from './LandscapeBg.module.scss';
 import type { BackgroundThemeComponentProps } from '../backgrounds';
 
@@ -175,15 +176,14 @@ export default function RainforestBg({ spaceMode = false }: BackgroundThemeCompo
     <>
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
       <Creature
-        Normal={GiPeaceDove}
-        Alien={GiButterfly}
+        Normal={Dove}
+        Alien={Butterfly}
         normalColor="#e0451b"
         alienColor="#d9a8ff"
         spaceMode={spaceMode}
         size={40}
         top="38%"
         duration={32}
-        motion="flap"
         glow
       />
     </>
