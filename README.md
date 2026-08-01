@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/master.svg?style=svg)](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/master)
 
-> A Vue.js project
+> A React + Vite project
 
 ## Build Setup
 
@@ -10,23 +10,28 @@
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8080
+# serve with hot reload at localhost:5173
 npm run dev
 
-# build for production with minification
+# build for production
 npm run build
 
-# build for production and view the bundle analyzer report
-npm run build --report
+# preview the production build locally
+npm run preview
 
-# run unit tests
-npm run unit
-
-# run e2e tests
-npm run e2e
-
-# run all tests
-npm test
+# lint
+npm run lint
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+## Configuration
+
+Copy `.env.example` to `.env` and fill in an Unsplash access key to enable the
+random background image:
+
+``` bash
+cp .env.example .env
+```
+
+Without a key the site still works — it just falls back to the plain gradient
+background. The same variable needs to be set in the deploy environment for the
+background to appear on the built site.

@@ -1,0 +1,24 @@
+@use '../styles/variables' as *;
+
+.button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  img {
+    height: auto;
+    width: 27px;
+    background-color: #ffe3a6;
+    border-radius: 50%;
+    transition: 0.25s box-shadow linear;
+    box-shadow: $box-shadow;
+
+    &:hover {
+      box-shadow: inset 0 0 42px 0 rgba(0, 0, 0, 0.75);
+    }
+  }
+}

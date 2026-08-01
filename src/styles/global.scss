@@ -1,0 +1,27 @@
+@use 'variables' as *;
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+// react-tooltip ships its own base styles; these restyle it to match the
+// start menu, replacing the look the old v-tooltip stylesheet provided.
+// The class is doubled to out-specify react-tooltip's own single-class rules,
+// which would otherwise win on source order.
+.app-tooltip.app-tooltip {
+  background: $menu-background;
+  color: #fff;
+  border-radius: 15px;
+  padding: 5px 10px 4px;
+  box-shadow: $box-shadow;
+  font-family: 'Lato', sans-serif;
+  opacity: 1;
+  z-index: 10000;
+}
+
+.app-tooltip-arrow {
+  display: none;
+}
