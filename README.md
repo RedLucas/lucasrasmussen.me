@@ -1,6 +1,6 @@
 # lucasrasmussen.me
 
-[![CircleCI](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/master.svg?style=svg)](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/master)
+[![CircleCI](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/main.svg?style=svg)](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/main)
 
 > A React + Vite project
 
