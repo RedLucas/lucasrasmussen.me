@@ -5,8 +5,9 @@
 // actually behind the modal (the landscape), not another flat layer, since
 // the live resume and the modal's own background are both hidden for the
 // duration of the burn (see BurnTransition.jsx/App.jsx) — and a trail of
-// wispy smoke that lingers a little past each pixel's own char fade before
-// dissipating, independent of the (already-zero) char alpha underneath it.
+// wispy smoke that stays fully present once it appears, rather than
+// dissipating on its own; the whole scene only fades away in one final
+// dissolve right before the burn completes (see uFinishAt below).
 // The fire radiates outward from a random point on the page (uOrigin)
 // rather than sweeping edge to edge, and the paper warps/darkens slightly
 // just ahead of the front to read as curling away rather than dissolving flat.
@@ -17,6 +18,7 @@ uniform vec2 uResolution;
 uniform float uProgress; // 0 (untouched) -> past 1 (fully gone)
 uniform float uSeed;
 uniform vec2 uOrigin; // ignition point, plain 0..1 uv space
+uniform float uFinishAt; // matches BurnTransition.jsx's completion cutoff
 
 // --- noise (ported from landscape.frag) ---------------------------------
 
@@ -119,23 +121,29 @@ void main() {
   float charAlpha = src.a * (1.0 - smoothstep(0.0, 1.0, charT));
 
   // Smoke: a thick wispy trail that rises just behind the char front and
-  // lingers well after the paper there is already fully gone, independent
-  // of charAlpha (which has already faded to 0 by this point). `age` is how
-  // far past the front this pixel sits — a stand-in for "how long ago this
-  // patch burned", since a stateless per-pixel shader has no real burn
-  // history to read. The envelope rises fast, then decays slowly enough
-  // that every burn visibly leaves smoke behind rather than a quick wisp;
-  // BurnTransition's completion cutoff (finishAt) is sized to give the last
-  // patch to burn time to fully dissipate before it fires.
+  // stays fully present — no per-pixel decay — so every burn visibly leaves
+  // smoke hanging in the air instead of watching it dissipate mid-animation.
+  // `age` is how far past the front this pixel sits, used only to fade the
+  // smoke *in* quickly once it ignites, not to fade it back out again.
   float age = -dist;
-  float envelope = smoothstep(0.0, 0.04, age) * exp(-age * 3.3);
+  float envelope = smoothstep(0.0, 0.04, age);
   vec2 driftUv = auv * 5.0 + vec2(0.6, -1.0) * (age + uProgress * 0.6) + uSeed * 23.0;
   float wisp = fbm2(driftUv);
   wisp = smoothstep(0.35, 0.75, wisp);
-  float smokeAlpha = envelope * wisp * 0.5;
+  float smokeAlpha = envelope * wisp * 0.55;
   vec3 smokeColor = vec3(0.5, 0.49, 0.47);
+
+  // Only smoke gets an explicit end fade, and only right at the very end —
+  // char is left alone, since it already burns down to fully transparent on
+  // its own as the front sweeps past (see charAlpha above). Fading the whole
+  // scene together, including paper that had already fully burnt away, read
+  // as the picture itself dissolving rather than the fire still working —
+  // smoke is the only thing here that doesn't clear on its own.
+  float smokeFade = smoothstep(uFinishAt * 0.85, uFinishAt, uProgress);
+  smokeAlpha *= 1.0 - smokeFade;
 
   vec3 finalColor = mix(charColor, smokeColor, smokeAlpha);
   float finalAlpha = max(charAlpha, smokeAlpha);
+
   gl_FragColor = vec4(finalColor, finalAlpha);
 }
