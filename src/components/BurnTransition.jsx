@@ -242,9 +242,11 @@ export default function BurnTransition({ sourceNodeRef, onComplete, onReady, dur
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.uniform1i(uTexture, 0);
 
-      // Runs a touch past 1 so the char/fade zone has time to fully clear
-      // before the completion handler tears everything down.
-      const finishAt = 1.15;
+      // Runs well past 1 so both the char/fade zone AND the smoke trail
+      // behind it (which lingers a bit after each patch finishes charring —
+      // see burn.frag) have time to fully clear before the completion
+      // handler tears everything down.
+      const finishAt = 1.7;
 
       const loop = (now) => {
         if (cancelled) return;

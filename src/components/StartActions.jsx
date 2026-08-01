@@ -1,3 +1,5 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShower } from '@fortawesome/free-solid-svg-icons';
 import { TOOLTIP_ID } from '../constants.js';
 import styles from './StartActions.module.scss';
 
@@ -10,7 +12,7 @@ const actions = [
   {
     name: 'Clear Cache',
     action: clearCache,
-    icon: 'fa-shower',
+    icon: faShower,
     tooltip: 'Clean Caches',
   },
 ];
@@ -31,7 +33,7 @@ export default function StartActions() {
             data-tooltip-content={action.tooltip}
             data-tooltip-place="top-start"
           >
-            <i className={`fa ${action.icon}`} />
+            <FontAwesomeIcon icon={action.icon} />
           </button>
         ))}
     </div>

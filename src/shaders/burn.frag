@@ -1,10 +1,12 @@
 // Burns away a captured snapshot of the resume, seeded differently every
-// close so the pattern is never the same twice. Three zones per pixel:
-// untouched (sample the texture as-is), a thin active ember edge, and
-// charred ash fading to fully transparent just behind it — revealing
-// whatever is actually behind the modal (the landscape), not another flat
-// layer, since the live resume and the modal's own background are both
-// hidden for the duration of the burn (see BurnTransition.jsx/App.jsx).
+// close so the pattern is never the same twice. Four zones per pixel:
+// untouched (sample the texture as-is), a thin active ember edge, charred
+// ash fading to fully transparent just behind it — revealing whatever is
+// actually behind the modal (the landscape), not another flat layer, since
+// the live resume and the modal's own background are both hidden for the
+// duration of the burn (see BurnTransition.jsx/App.jsx) — and a trail of
+// wispy smoke that lingers a little past each pixel's own char fade before
+// dissipating, independent of the (already-zero) char alpha underneath it.
 precision highp float;
 
 uniform sampler2D uTexture;
@@ -90,6 +92,25 @@ void main() {
   float charWidth = 0.10;
   float charT = clamp(-dist / charWidth, 0.0, 1.0);
   vec3 charColor = mix(vec3(0.05, 0.03, 0.02), vec3(0.0), charT);
-  float alpha = src.a * (1.0 - smoothstep(0.0, 1.0, charT));
-  gl_FragColor = vec4(charColor, alpha);
+  float charAlpha = src.a * (1.0 - smoothstep(0.0, 1.0, charT));
+
+  // Smoke: a wispy trail that rises just behind the char front and lingers
+  // after the paper there is already fully gone, independent of charAlpha
+  // (which has already faded to 0 by this point). `age` is how far past the
+  // front this pixel sits — a stand-in for "how long ago this patch burned",
+  // since a stateless per-pixel shader has no real burn history to read.
+  // The envelope rises fast, then decays over roughly half a burn-duration
+  // so the last patch to burn still gets time to visibly dissipate before
+  // BurnTransition's completion cutoff (see finishAt in BurnTransition.jsx).
+  float age = -dist;
+  float envelope = smoothstep(0.0, 0.04, age) * exp(-age * 6.0);
+  vec2 driftUv = auv * 5.0 + vec2(0.6, -1.0) * (age + uProgress * 0.6) + uSeed * 23.0;
+  float wisp = fbm2(driftUv);
+  wisp = smoothstep(0.4, 0.8, wisp);
+  float smokeAlpha = envelope * wisp * 0.32;
+  vec3 smokeColor = vec3(0.5, 0.49, 0.47);
+
+  vec3 finalColor = mix(charColor, smokeColor, smokeAlpha);
+  float finalAlpha = max(charAlpha, smokeAlpha);
+  gl_FragColor = vec4(finalColor, finalAlpha);
 }

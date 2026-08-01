@@ -5,6 +5,9 @@ precision highp float;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform float uSeed;
+// Fraction of the current UTC day elapsed (0..1), so the sun's height is the
+// same for every visitor at a given moment rather than randomized per load.
+uniform float uDayFraction;
 
 const int LAYERS = 6;
 const float HORIZON = 0.46;
@@ -127,9 +130,13 @@ void main() {
   vec3 col = mix(pal.horizon, pal.mid, pow(sky, 0.55));
   col = mix(col, pal.zenith, pow(sky, 1.9));
 
-  // Sun, parked just above the horizon and nudged by the seed.
+  // Sun, parked just above the horizon. Horizontal placement is still
+  // per-load variety from the seed, but height follows a smooth day cycle —
+  // peaking at UTC noon, lowest at UTC midnight — so it's the same for every
+  // visitor watching at the same moment rather than random per page load.
   float sunX = 0.22 + fract(uSeed * 7.31) * 0.56;
-  float sunY = HORIZON + 0.015 + fract(uSeed * 3.77) * 0.07;
+  float dayHeight = 0.5 - 0.5 * cos(uDayFraction * 6.28318530718);
+  float sunY = HORIZON + 0.015 + dayHeight * 0.07;
   vec2 sunUv = vec2((uv.x - sunX) * aspect, uv.y - sunY);
   float sunDist = length(sunUv);
   col += pal.sun * exp(-sunDist * 11.0) * 0.55;

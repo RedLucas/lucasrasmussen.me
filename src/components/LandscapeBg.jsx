@@ -6,6 +6,14 @@ import styles from './LandscapeBg.module.scss';
 // Retina at full resolution buys almost nothing on a soft gradient like this
 // and costs a lot of fragment work, so cap it.
 const MAX_DPR = 1.5;
+const DAY_MS = 86400000;
+
+// Fraction of the current UTC day elapsed (0..1) — real wall-clock time, not
+// performance.now(), so every visitor's sun sits at the same height at a
+// given moment regardless of when their own session started.
+function dayFraction() {
+  return (Date.now() % DAY_MS) / DAY_MS;
+}
 
 function compile(gl, type, source) {
   const shader = gl.createShader(type);
@@ -70,6 +78,7 @@ export default function LandscapeBg() {
     const uResolution = gl.getUniformLocation(program, 'uResolution');
     const uTime = gl.getUniformLocation(program, 'uTime');
     const uSeed = gl.getUniformLocation(program, 'uSeed');
+    const uDayFraction = gl.getUniformLocation(program, 'uDayFraction');
 
     gl.useProgram(program);
     gl.enableVertexAttribArray(aPosition);
@@ -97,6 +106,7 @@ export default function LandscapeBg() {
     const draw = () => {
       resize();
       gl.uniform1f(uTime, elapsed);
+      gl.uniform1f(uDayFraction, dayFraction());
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
