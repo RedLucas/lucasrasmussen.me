@@ -72,6 +72,13 @@
   animation-iteration-count: infinite;
 }
 
+// An indefinitely looping animation is exactly what this preference is for.
+@media (prefers-reduced-motion: reduce) {
+  .pulser {
+    animation: none;
+  }
+}
+
 @keyframes pulser {
   0% {
     background-color: white;

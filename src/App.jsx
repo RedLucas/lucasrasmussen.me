@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Route, Routes } from 'react-router';
 import { Tooltip } from 'react-tooltip';
 import StartMenu from './components/StartMenu.jsx';
-import UnsplashBg from './components/UnsplashBg.jsx';
+import LandscapeBg from './components/LandscapeBg.jsx';
 import Grid from './components/Grid.jsx';
 import { TOOLTIP_ID } from './constants.js';
 import logo from './assets/img/lucasrasmussen-logo.svg';
@@ -27,7 +27,7 @@ export default function App() {
 
   return (
     <div className={styles.app}>
-      <UnsplashBg />
+      <LandscapeBg />
       <div
         className={`${styles.modal} ${expanded ? styles.resume : styles.logo}`}
         onTransitionEnd={handleTransitionEnd}

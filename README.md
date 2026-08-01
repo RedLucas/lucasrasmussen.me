@@ -23,15 +23,13 @@ npm run preview
 npm run lint
 ```
 
-## Configuration
+## Background
 
-Copy `.env.example` to `.env` and fill in an Unsplash access key to enable the
-random background image:
+The background is a WebGL fragment shader that draws a procedural sunset
+landscape — layered ridge silhouettes under a graded sky. It's generated from a
+random seed on each load, so every visit gets a different scene, and it needs no
+API key, network request, or image asset. See `src/shaders/landscape.frag`.
 
-``` bash
-cp .env.example .env
-```
-
-Without a key the site still works — it just falls back to the plain gradient
-background. The same variable needs to be set in the deploy environment for the
-background to appear on the built site.
+It respects `prefers-reduced-motion` (the scene renders but holds still), pauses
+while the tab is hidden, and falls back to the plain gradient if WebGL is
+unavailable.
