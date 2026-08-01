@@ -1,19 +1,8 @@
 $popup-background: white;
 
-// A Windows-XP-taskbar-style treatment — a glassy sheen over a banded shade —
-// recoloured to a dark, near-black palette instead of Luna blue. Kept
-// translucent (as the original flat gradient was) so the landscape still
-// shows faintly through the bar and the tooltips, rather than going opaque.
-$menu-background:
-  linear-gradient(to bottom, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 55%),
-  linear-gradient(
-    180deg,
-    rgba(90, 90, 90, 0.55) 0%,
-    rgba(40, 40, 40, 0.75) 14%,
-    rgba(10, 10, 10, 0.88) 55%,
-    rgba(0, 0, 0, 0.92) 100%
-  );
-// The thin bevel highlight along a glossy panel's top edge.
-$menu-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-
-$box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.75);
+// Shared with the résumé's own paper palette (also used by App.module.scss's
+// close button, so it lives here rather than duplicated as hex literals).
+$paper: #fdfbf8;
+$ink: #241f1b;
+$ink-soft: #6e655c;
+$accent: #d6431f;

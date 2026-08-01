@@ -9,7 +9,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  // 100dvh tracks the actual visible viewport as mobile toolbars show/hide;
+  // 100vh doesn't, and could leave the document taller than what's really
+  // visible. position + overflow are defense-in-depth beyond that: this is
+  // meant to be a fixed, non-scrolling "desktop", and without a positioned
+  // ancestor here, LandscapeBg's absolutely-positioned canvas has no real
+  // containing block to size against — it was falling through to the
+  // viewport's initial containing block, decoupled from this box entirely.
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(to right, #e44d26, #f16529);
 }
 
@@ -31,9 +40,25 @@
   }
 }
 
-// Window chrome, not part of the document it's closing — reuses the
-// taskbar's own tokens rather than the resume's paper palette, and its
-// hover/focus feedback stays monochrome for the same reason.
+// While burning, the modal's own fill/shadow needs to disappear instantly
+// (not fade over the inherited `transition: all 0.5s`, which would race
+// visibly against the shader's own progress) so the canvas burning through
+// reveals the actual landscape behind, not this box's own opaque paint.
+.burning {
+  background: transparent;
+  box-shadow: none;
+  transition: none;
+}
+
+// The live resume stays mounted (BurnTransition needs its ref for the whole
+// burn), just not painted — otherwise the still-intact content underneath
+// would show through wherever the burn canvas above it goes transparent.
+.hiddenResume {
+  visibility: hidden;
+}
+
+// Part of the document it's closing, not the taskbar — colored with the
+// résumé's own paper/ink/accent palette rather than window chrome.
 .close {
   position: absolute;
   top: 1rem;
@@ -44,23 +69,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  border: 1px solid rgba(36, 31, 27, 0.14);
   border-radius: 50%;
   cursor: pointer;
-  color: #fff;
+  color: $ink-soft;
   font-size: 1rem;
-  background-color: #000;
-  background-image: $menu-background;
-  box-shadow: $box-shadow, $menu-highlight;
-  transition: transform 0.15s ease;
+  background: $paper;
+  box-shadow: 0 1px 3px rgba(36, 31, 27, 0.18);
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 
   &:hover,
   &:focus-visible {
-    transform: scale(1.08);
+    transform: scale(1.05);
+    color: $accent;
+    border-color: rgba(214, 67, 31, 0.4);
   }
 
   &:focus-visible {
-    outline: 2px solid #fff;
+    outline: 2px solid $accent;
     outline-offset: 2px;
   }
 }
@@ -84,7 +113,7 @@
 //
 // Portrait and narrow screens: a sheet filling most of the display.
 .resume {
-  border-radius: 15px;
+  border-radius: 0;
   width: min(94vw, 38rem);
   height: min(90vh, 52rem);
   max-width: 100%;
