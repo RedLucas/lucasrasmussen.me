@@ -48,7 +48,7 @@ function Entry({ title, dates, subtitle, detail, children }) {
   );
 }
 
-export default function Resume() {
+export default function Resume({ ref }) {
   const { basics, work, education, skills, languages, meta } = resume;
   const { city, region } = basics.location;
   // JSON Resume has no conferences section and closes the root to unknown
@@ -59,7 +59,7 @@ export default function Resume() {
   const skillNotes = skills.filter((skill) => skill.level);
 
   return (
-    <article className={styles.paper} tabIndex={0} aria-label={`Résumé — ${basics.name}`}>
+    <article ref={ref} className={styles.paper} tabIndex={0} aria-label={`Résumé — ${basics.name}`}>
       <div className={styles.sheet}>
         <header className={styles.header}>
           <h1 className={styles.name}>{basics.name}</h1>

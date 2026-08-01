@@ -1,5 +1,3 @@
-@use 'variables' as *;
-
 html,
 body,
 #app {
@@ -8,15 +6,19 @@ body,
 }
 
 // react-tooltip ships its own base styles; these restyle it to match the
-// start menu, replacing the look the old v-tooltip stylesheet provided.
+// site, replacing the look the old v-tooltip stylesheet provided.
 // The class is doubled to out-specify react-tooltip's own single-class rules,
 // which would otherwise win on source order.
+//
+// A flat dark chip, not frosted glass — backdrop-filter has nothing stable
+// to read as "glass" on something this small that appears and vanishes
+// within a second.
 .app-tooltip.app-tooltip {
-  background: $menu-background;
+  background-color: rgba(20, 20, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
   border-radius: 15px;
   padding: 5px 10px 4px;
-  box-shadow: $box-shadow;
   font-family: 'Lato', sans-serif;
   opacity: 1;
   z-index: 10000;

@@ -3,9 +3,23 @@ import vertSource from '../shaders/landscape.vert?raw';
 import fragSource from '../shaders/landscape.frag?raw';
 import styles from './LandscapeBg.module.scss';
 
-// Retina at full resolution buys almost nothing on a soft gradient like this
-// and costs a lot of fragment work, so cap it.
-const MAX_DPR = 1.5;
+// Ridge silhouettes have hard edges, so full retina resolution is visibly
+// sharper than a plain gradient would justify — render at the device's
+// actual pixel density rather than downsampling. Capped at 3 purely as a
+// safety ceiling against pathological values (e.g. browser zoom inflating
+// devicePixelRatio well past what any real display panel uses).
+const MAX_DPR = 3;
+// A stylized day, not a real 24-hour one — fast enough that the sun's drift
+// is noticeable within a normal page visit, slow enough to still read as
+// ambient rather than an obvious animation.
+const SUN_CYCLE_MS = 3 * 60 * 1000;
+
+// Phase of the current cycle elapsed (0..1) — real wall-clock time, not
+// performance.now(), so every visitor's sun sits at the same height at a
+// given moment regardless of when their own session started.
+function sunCyclePhase() {
+  return (Date.now() % SUN_CYCLE_MS) / SUN_CYCLE_MS;
+}
 
 function compile(gl, type, source) {
   const shader = gl.createShader(type);
@@ -70,6 +84,7 @@ export default function LandscapeBg() {
     const uResolution = gl.getUniformLocation(program, 'uResolution');
     const uTime = gl.getUniformLocation(program, 'uTime');
     const uSeed = gl.getUniformLocation(program, 'uSeed');
+    const uSunPhase = gl.getUniformLocation(program, 'uSunPhase');
 
     gl.useProgram(program);
     gl.enableVertexAttribArray(aPosition);
@@ -97,6 +112,7 @@ export default function LandscapeBg() {
     const draw = () => {
       resize();
       gl.uniform1f(uTime, elapsed);
+      gl.uniform1f(uSunPhase, sunCyclePhase());
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 

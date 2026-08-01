@@ -9,13 +9,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  // 100dvh tracks the actual visible viewport as mobile toolbars show/hide;
+  // 100vh doesn't, and could leave the document taller than what's really
+  // visible. position + overflow are defense-in-depth beyond that: this is
+  // meant to be a fixed, non-scrolling "desktop", and without a positioned
+  // ancestor here, LandscapeBg's absolutely-positioned canvas has no real
+  // containing block to size against — it was falling through to the
+  // viewport's initial containing block, decoupled from this box entirely.
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(to right, #e44d26, #f16529);
 }
 
+// Sizing the sheet as a share of the viewport just inherits the display's
+// shape — a 16:9 letterbox on a monitor, a sliver on a phone. Give it its own
+// proportions instead, capped on both axes.
+//
+// Portrait and narrow screens: a sheet filling most of the display.
 .modal {
   background: $popup-background;
-  transition: all 0.5s linear;
   box-shadow:
     0 0 42px 0 rgba(0, 0, 0, 0.75),
     inset 0 0 5px 0 rgba(0, 0, 0, 0.75);
@@ -25,70 +38,87 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
-
-  > img {
-    border-radius: 50%;
-  }
-}
-
-.logo {
-  transition: background-color 0.5s linear;
-  border-radius: 50%;
-  width: 100px;
-  height: 100px;
-
-  > img {
-    transition: background-color 0.5s linear;
-    width: 100%;
-    height: auto;
-  }
-}
-
-// Sizing the sheet as a share of the viewport just inherits the display's
-// shape — a 16:9 letterbox on a monitor, a sliver on a phone. Give it its own
-// proportions instead, capped on both axes.
-//
-// Portrait and narrow screens: a sheet filling most of the display.
-.resume {
-  border-radius: 15px;
+  border-radius: 0;
   width: min(94vw, 38rem);
   height: min(90vh, 52rem);
   max-width: 100%;
+  animation: modalFadeIn 180ms ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    animation: none;
+  }
 }
 
 // Given room to spread, it becomes a document window rather than a tall sheet.
 // The middle term caps width against height, so a short landscape window
 // stretches into a letterbox no more than a wide one does.
 @media (min-aspect-ratio: 1 / 1) {
-  .resume {
+  .modal {
     width: min(90vw, calc(86vh * 1.7), 68rem);
     height: min(86vh, 46rem);
   }
 }
 
-.pulser {
-  animation-name: pulser;
-  animation-duration: 5000ms;
-  animation-iteration-count: infinite;
+// While burning, the modal's own fill/shadow needs to disappear instantly so
+// the canvas burning through reveals the actual landscape behind, not this
+// box's own opaque paint.
+.burning {
+  background: transparent;
+  box-shadow: none;
 }
 
-// An indefinitely looping animation is exactly what this preference is for.
-@media (prefers-reduced-motion: reduce) {
-  .pulser {
-    animation: none;
-  }
+// The live resume stays mounted (BurnTransition needs its ref for the whole
+// burn), just not painted — otherwise the still-intact content underneath
+// would show through wherever the burn canvas above it goes transparent.
+.hiddenResume {
+  visibility: hidden;
 }
 
-@keyframes pulser {
-  0% {
-    background-color: white;
+// Part of the document it's closing, not the taskbar — colored with the
+// résumé's own paper/ink/accent palette rather than window chrome.
+.close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(36, 31, 27, 0.14);
+  border-radius: 50%;
+  cursor: pointer;
+  color: $ink-soft;
+  font-size: 1rem;
+  background: $paper;
+  box-shadow: 0 1px 3px rgba(36, 31, 27, 0.18);
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: scale(1.05);
+    color: $accent;
+    border-color: rgba(214, 67, 31, 0.4);
   }
 
-  55% {
-    background-color: #ffe3a6;
-  }
-
-  100% {
-    background-color: white;
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
   }
 }

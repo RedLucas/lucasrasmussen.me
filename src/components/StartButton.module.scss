@@ -1,5 +1,3 @@
-@use '../styles/variables' as *;
-
 .button {
   display: flex;
   flex-direction: column;
@@ -14,11 +12,10 @@
     width: 27px;
     background-color: #ffe3a6;
     border-radius: 50%;
-    transition: 0.25s box-shadow linear;
-    box-shadow: $box-shadow;
+    transition: filter 0.2s ease;
 
     &:hover {
-      box-shadow: inset 0 0 42px 0 rgba(0, 0, 0, 0.75);
+      filter: brightness(1.12);
     }
   }
 }

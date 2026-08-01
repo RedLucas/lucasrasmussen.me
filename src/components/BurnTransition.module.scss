@@ -1,0 +1,10 @@
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  // Above .close (z-index: 2) — occludes the (now-hidden) live resume and
+  // the modal's own background purely through paint order.
+  z-index: 3;
+}

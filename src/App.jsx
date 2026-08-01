@@ -1,45 +1,142 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Route, Routes } from 'react-router';
 import { Tooltip } from 'react-tooltip';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import StartMenu from './components/StartMenu.jsx';
-import LandscapeBg from './components/LandscapeBg.jsx';
 import Grid from './components/Grid.jsx';
 import Resume from './components/Resume.jsx';
+import BurnTransition from './components/BurnTransition.jsx';
 import { TOOLTIP_ID } from './constants.js';
-import logo from './assets/img/lucasrasmussen-logo.svg';
+import { useBackgroundTheme } from './backgrounds.js';
 import styles from './App.module.scss';
 import 'react-tooltip/dist/react-tooltip.css';
 
 export default function App() {
-  const [expanded, setExpanded] = useState(false);
-  const [showResume, setShowResume] = useState(false);
+  // There's no more grow/shrink morph, so opening and showing the resume
+  // happen together — a single `open` state replaces the old
+  // expanded/showResume pair entirely.
+  const [open, setOpen] = useState(false);
+  const { theme, cycleTheme } = useBackgroundTheme();
+  const [burning, setBurning] = useState(false);
+  // Separate from `burning`: setup (compile/capture/texture-upload) can take
+  // a while, especially on slower devices. Only flip the resume/modal hidden
+  // once the shader is actually about to draw its first frame, so there's
+  // never a window where the close button is gone, the resume is hidden, and
+  // nothing has replaced it yet.
+  const [burnReady, setBurnReady] = useState(false);
 
-  // Clicking the start button grows the modal via a CSS transition. Only once
-  // that transition has finished do we swap the logo out for the resume, so it
-  // never renders at the small logo size. `transition: all` fires one event per
-  // animated property; re-setting the same value is a no-op in React, so the
-  // extra events are harmless.
-  const handleTransitionEnd = () => {
-    if (expanded) setShowResume(true);
+  // Containment checks for the backdrop-click dismiss (see handleBackdropClick).
+  const modalRef = useRef(null);
+  const startMenuRef = useRef(null);
+  // Focus management: return focus to the trigger on close, move it into the
+  // resume on open.
+  const startButtonRef = useRef(null);
+  const resumeRef = useRef(null);
+
+  useEffect(() => {
+    if (open) resumeRef.current?.focus();
+  }, [open]);
+
+  // Starts the burn rather than closing immediately. All four dismiss paths
+  // (X button, Escape, backdrop click, Start-button toggle) already funnel
+  // through this, so none of them need to change.
+  const closeResume = useCallback(() => {
+    if (burning || !open) return; // already closing, or nothing open to close
+    setBurnReady(false);
+    setBurning(true);
+  }, [burning, open]);
+
+  // Fired by BurnTransition once its shader is actually ready to paint —
+  // only then is it safe to hide the live resume and make the modal
+  // transparent, so the burn's first visible frame is the fire itself, not a
+  // gap.
+  const handleBurnReady = useCallback(() => setBurnReady(true), []);
+
+  // The actual teardown, once BurnTransition (paper + lingering smoke)
+  // finishes, or fails open. By this point the canvas has already faded to
+  // nothing, so the modal can simply unmount rather than needing its own
+  // closing transition. The Start button is always mounted, so focusing it
+  // synchronously here is safe.
+  const handleBurnComplete = useCallback(() => {
+    setBurning(false);
+    setBurnReady(false);
+    setOpen(false);
+    startButtonRef.current?.focus();
+  }, []);
+
+  const toggleResume = () => (open ? closeResume() : setOpen(true));
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') closeResume();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, closeResume]);
+
+  // A plain `event.target === event.currentTarget` check doesn't work here:
+  // LandscapeBg renders an absolutely-positioned <canvas> with no
+  // pointer-events: none directly under everything, so target is that canvas
+  // for any "empty space" click, never .app itself. Containment checks are
+  // correct regardless of what's under the click.
+  const handleBackdropClick = (event) => {
+    if (!open) return;
+    if (modalRef.current?.contains(event.target)) return;
+    if (startMenuRef.current?.contains(event.target)) return;
+    closeResume();
   };
 
   return (
-    <div className={styles.app}>
-      <LandscapeBg />
-      <div
-        className={`${styles.modal} ${expanded ? styles.resume : styles.logo}`}
-        onTransitionEnd={handleTransitionEnd}
-      >
-        {showResume ? (
-          <Resume />
-        ) : (
-          <img className={styles.pulser} src={logo} alt="Lucas Rasmussen" />
-        )}
-      </div>
+    <div className={styles.app} onClick={handleBackdropClick}>
+      <theme.Component />
+      {open && (
+        <div
+          ref={modalRef}
+          className={`${styles.modal} ${burnReady ? styles.burning : ''}`}
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* A plain wrapper, not a Resume prop — Resume stays purely about
+              content; App owns modal chrome, including hiding it during the
+              burn so burned-through regions reveal the landscape behind the
+              (now-transparent) modal rather than the still-intact resume
+              sitting underneath the burn canvas. */}
+          <div className={burnReady ? styles.hiddenResume : undefined}>
+            <Resume ref={resumeRef} />
+          </div>
+          {!burning && (
+            <button
+              type="button"
+              className={styles.close}
+              onClick={closeResume}
+              aria-label="Close résumé"
+            >
+              <FontAwesomeIcon icon={faXmark} />
+            </button>
+          )}
+          {burning && (
+            <BurnTransition
+              sourceNodeRef={resumeRef}
+              onComplete={handleBurnComplete}
+              onReady={handleBurnReady}
+              durationMs={1100}
+            />
+          )}
+        </div>
+      )}
       <Routes>
         <Route path="/" element={<Grid />} />
       </Routes>
-      <StartMenu onLogoClick={() => setExpanded(true)} />
+      <StartMenu
+        ref={startMenuRef}
+        buttonRef={startButtonRef}
+        expanded={open}
+        onToggle={toggleResume}
+        backgroundThemeLabel={theme.label}
+        onCycleBackground={cycleTheme}
+      />
       <Tooltip id={TOOLTIP_ID} className="app-tooltip" classNameArrow="app-tooltip-arrow" />
     </div>
   );

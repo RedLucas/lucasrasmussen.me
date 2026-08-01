@@ -5,6 +5,11 @@ precision highp float;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform float uSeed;
+// Phase (0..1) of a stylized, fast day/night cycle driven by real wall-clock
+// time (see LandscapeBg.jsx), so the sun's height is the same for every
+// visitor at a given moment rather than randomized per load, and its drift
+// is slow enough to read as ambient rather than an obvious animation.
+uniform float uSunPhase;
 
 const int LAYERS = 6;
 const float HORIZON = 0.46;
@@ -127,9 +132,13 @@ void main() {
   vec3 col = mix(pal.horizon, pal.mid, pow(sky, 0.55));
   col = mix(col, pal.zenith, pow(sky, 1.9));
 
-  // Sun, parked just above the horizon and nudged by the seed.
+  // Sun, parked just above the horizon. Horizontal placement is still
+  // per-load variety from the seed, but height follows a smooth, fast-forward
+  // day cycle (see uSunPhase) so it's the same for every visitor watching at
+  // the same moment, and visibly drifts rather than sitting frozen all load.
   float sunX = 0.22 + fract(uSeed * 7.31) * 0.56;
-  float sunY = HORIZON + 0.015 + fract(uSeed * 3.77) * 0.07;
+  float cycleHeight = 0.5 - 0.5 * cos(uSunPhase * 6.28318530718);
+  float sunY = HORIZON + 0.015 + cycleHeight * 0.07;
   vec2 sunUv = vec2((uv.x - sunX) * aspect, uv.y - sunY);
   float sunDist = length(sunUv);
   col += pal.sun * exp(-sunDist * 11.0) * 0.55;

@@ -2,13 +2,11 @@
 // notepad margin rule and a fine grain. The layout answers to the panel's own
 // width rather than the viewport, so it reflows correctly regardless of how
 // large the modal happens to be.
+@use '../styles/variables' as *;
 
-$paper: #fdfbf8;
-$ink: #241f1b;
-$ink-soft: #6e655c;
+// $paper/$ink/$ink-soft/$accent live in the shared variables file — the
+// close button (App.module.scss) needs the same palette.
 $ink-faint: #a2988e;
-// The site's own ember, deepened just enough to hold contrast on paper.
-$accent: #d6431f;
 $rule: rgba(36, 31, 27, 0.1);
 
 // Fine paper grain. Generated rather than fetched, like the background.
@@ -57,14 +55,23 @@ $sans:
   flex-direction: column;
   gap: clamp(1.75rem, 3cqi, 2.5rem);
 
+  // A scored/embossed crease rather than a flat drawn line — a dark core
+  // plus a light sliver on the trailing edge reads as pressed into the
+  // paper and catching light, the way an actual ruled/cut sheet would.
   &::before {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
     left: var(--rule-x);
-    width: 1px;
-    background: rgba(214, 67, 31, 0.16);
+    width: 1.5px;
+    background: linear-gradient(
+      to right,
+      rgba(214, 67, 31, 0.34) 0%,
+      rgba(214, 67, 31, 0.34) 55%,
+      rgba(255, 255, 255, 0.4) 100%
+    );
+    box-shadow: 1px 0 1px rgba(36, 31, 27, 0.06);
   }
 
   &::after {
