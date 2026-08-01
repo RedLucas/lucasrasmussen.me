@@ -8,13 +8,16 @@ import styles from './LandscapeBg.module.scss';
 // full devicePixelRatio) since 3x+ displays see essentially no further
 // improvement for the added fragment cost.
 const MAX_DPR = 2;
-const DAY_MS = 86400000;
+// A stylized day, not a real 24-hour one — fast enough that the sun's drift
+// is noticeable within a normal page visit, slow enough to still read as
+// ambient rather than an obvious animation.
+const SUN_CYCLE_MS = 3 * 60 * 1000;
 
-// Fraction of the current UTC day elapsed (0..1) — real wall-clock time, not
+// Phase of the current cycle elapsed (0..1) — real wall-clock time, not
 // performance.now(), so every visitor's sun sits at the same height at a
 // given moment regardless of when their own session started.
-function dayFraction() {
-  return (Date.now() % DAY_MS) / DAY_MS;
+function sunCyclePhase() {
+  return (Date.now() % SUN_CYCLE_MS) / SUN_CYCLE_MS;
 }
 
 function compile(gl, type, source) {
@@ -80,7 +83,7 @@ export default function LandscapeBg() {
     const uResolution = gl.getUniformLocation(program, 'uResolution');
     const uTime = gl.getUniformLocation(program, 'uTime');
     const uSeed = gl.getUniformLocation(program, 'uSeed');
-    const uDayFraction = gl.getUniformLocation(program, 'uDayFraction');
+    const uSunPhase = gl.getUniformLocation(program, 'uSunPhase');
 
     gl.useProgram(program);
     gl.enableVertexAttribArray(aPosition);
@@ -108,7 +111,7 @@ export default function LandscapeBg() {
     const draw = () => {
       resize();
       gl.uniform1f(uTime, elapsed);
-      gl.uniform1f(uDayFraction, dayFraction());
+      gl.uniform1f(uSunPhase, sunCyclePhase());
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
