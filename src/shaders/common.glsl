@@ -90,3 +90,27 @@ vec2 celestialBody(vec2 uv, vec2 center, float radius, float glowStrength) {
   float core = smoothstep(radius * 1.155, radius * 0.888, d);
   return vec2(glow, core);
 }
+
+// Reflective spheres (moons, planets) need a different tool than
+// celestialBody's soft self-luminous glow: a fake sphere normal derived from
+// flat disc geometry (treating the disc as a hemisphere seen face-on), shaded
+// against the actual direction to a light source so there's a real
+// day/night terminator, plus a crisp hard edge rather than a wide glowy
+// falloff. `ambient` (0..1) sets the unlit-side floor so the dark side
+// stays dimly visible instead of going pure black.
+float litSphereShade(vec2 uv, vec2 center, float radius, vec2 lightDir2D, float ambient) {
+  vec2 pNorm = (uv - center) / radius;
+  float z = sqrt(max(0.0, 1.0 - dot(pNorm, pNorm)));
+  vec3 normal = normalize(vec3(pNorm, z));
+  vec3 lightDir = normalize(vec3(lightDir2D, 0.4));
+  float lighting = clamp(dot(normal, lightDir), 0.0, 1.0);
+  return mix(ambient, 1.0, pow(lighting, 0.8));
+}
+
+// A tight, solid edge — composed from two normal-order smoothsteps (rather
+// than one reversed-order one, which GLSL leaves spec-ambiguous) so the
+// transition is well-defined on every platform.
+float hardDiscMask(vec2 uv, vec2 center, float radius) {
+  float dist = length(uv - center);
+  return 1.0 - smoothstep(radius * 0.94, radius * 1.04, dist);
+}

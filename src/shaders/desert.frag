@@ -73,29 +73,27 @@ void main() {
   // Space mode: a ringed planet opposite the sun, plus two small moons.
   vec2 planetCenter = vec2((1.0 - sunX) * aspect, HORIZON + 0.32);
   vec2 planetUv = auv - planetCenter;
+  vec2 sunDir = normalize(sunCenter - planetCenter);
+
+  // Ring band: composed as the difference of two normal-order smoothsteps
+  // (rise at the inner edge minus rise at the outer edge) rather than a
+  // product of one normal- and one reversed-order smoothstep — reversed
+  // argument order is spec-ambiguous, and was previously producing both
+  // ring edges on the same side instead of a clean band.
   float ringDist = length(vec2(planetUv.x, planetUv.y * 2.4));
   float planetRadius = 0.052;
-  float ringMask =
-    smoothstep(planetRadius * 1.55, planetRadius * 1.7, ringDist) *
-    smoothstep(planetRadius * 2.5, planetRadius * 2.25, ringDist);
+  float ringMask = smoothstep(planetRadius * 1.55, planetRadius * 1.7, ringDist) -
+                    smoothstep(planetRadius * 2.25, planetRadius * 2.5, ringDist);
 
   // The planet isn't self-luminous like a sun/moon, so it's lit rather than
-  // flat-colored: fake sphere geometry from the flat disc (a hemisphere's
-  // height at each point) and shade it against the actual direction to the
-  // sun in this scene, giving a real day/night terminator rather than a
-  // uniformly-bright disc.
+  // flat-colored: a shared lit-sphere helper gives it a real day/night
+  // terminator (shaded toward the actual sun direction) with a crisp solid
+  // edge, not celestialBody's soft self-luminous glow.
   float distToPlanet = length(planetUv);
-  float planetMask = smoothstep(planetRadius * 1.04, planetRadius * 0.94, distToPlanet);
-  vec2 pNorm = planetUv / planetRadius;
-  float sphereZ = sqrt(max(0.0, 1.0 - dot(pNorm, pNorm)));
-  vec3 sphereNormal = normalize(vec3(pNorm, sphereZ));
-  vec2 sunDir = normalize(sunCenter - planetCenter);
-  vec3 lightDir = normalize(vec3(sunDir, 0.4));
-  float lighting = clamp(dot(sphereNormal, lightDir), 0.0, 1.0);
-  float shade = mix(0.10, 1.0, pow(lighting, 0.8));
+  float planetMask = hardDiscMask(auv, planetCenter, planetRadius);
+  float shade = litSphereShade(auv, planetCenter, planetRadius, sunDir, 0.10);
   vec3 planetBase = vec3(0.78, 0.58, 0.46);
   vec3 planetColor = planetBase * shade;
-  float planetGlow = exp(-distToPlanet * (0.5 / planetRadius)) * 0.15;
 
   // Same sun direction, applied in-plane to the ring — the side nearer the
   // sun reads brighter, the far side dimmer.
@@ -103,14 +101,21 @@ void main() {
   vec3 ringColor = vec3(0.68, 0.58, 0.52) * mix(0.35, 1.0, ringLight);
 
   col = mix(col, ringColor, ringMask * uSpaceT * 0.55);
-  col += planetBase * planetGlow * uSpaceT;
   col = mix(col, planetColor, planetMask * uSpaceT);
 
-  vec2 moonA = celestialBody(auv, vec2(0.14 * aspect, HORIZON + 0.44), 0.013, 0.3);
-  vec2 moonB = celestialBody(auv, vec2(0.88 * aspect, HORIZON + 0.14), 0.010, 0.3);
+  // Moons: same lit-sphere + hard-edge treatment as the planet, each shaded
+  // toward its own direction to the sun rather than glowing on their own.
+  vec2 moonACenter = vec2(0.14 * aspect, HORIZON + 0.44);
+  vec2 moonBCenter = vec2(0.88 * aspect, HORIZON + 0.14);
+  float moonARadius = 0.016;
+  float moonBRadius = 0.013;
+  float moonAMask = hardDiscMask(auv, moonACenter, moonARadius);
+  float moonBMask = hardDiscMask(auv, moonBCenter, moonBRadius);
+  float moonAShade = litSphereShade(auv, moonACenter, moonARadius, normalize(sunCenter - moonACenter), 0.06);
+  float moonBShade = litSphereShade(auv, moonBCenter, moonBRadius, normalize(sunCenter - moonBCenter), 0.06);
   vec3 moonColor = vec3(0.86, 0.84, 0.80);
-  col += moonColor * (moonA.x + moonB.x) * uSpaceT;
-  col = mix(col, moonColor, max(moonA.y, moonB.y) * uSpaceT);
+  col = mix(col, moonColor * moonAShade, moonAMask * uSpaceT);
+  col = mix(col, moonColor * moonBShade, moonBMask * uSpaceT);
 
   // Dune layers, painted far to near.
   for (int i = 0; i < LAYERS; i++) {

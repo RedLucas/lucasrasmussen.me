@@ -54,13 +54,18 @@ void main() {
   auroraColor = mix(auroraColor, auroraMagenta, uSpaceT * 0.5);
   col += auroraColor * auroraMask * mix(0.55, 0.95, uSpaceT);
 
-  // Space mode: a large, low, cratered moon.
+  // Space mode: a large, low, cratered moon. There's no visible sun in this
+  // night scene, so it's lit from a fixed low-angle direction (as if from a
+  // sun just below the horizon) rather than toward an on-screen body — a
+  // crisp lit-sphere edge instead of celestialBody's soft self-luminous glow.
   vec2 moonCenter = vec2(0.72 * aspect, HORIZON + 0.10);
-  vec2 moon = celestialBody(auv, moonCenter, 0.075, 0.18);
+  float moonRadius = 0.075;
+  vec2 moonLightDir = normalize(vec2(-0.5, 0.35));
+  float moonMask = hardDiscMask(auv, moonCenter, moonRadius);
+  float moonShade = litSphereShade(auv, moonCenter, moonRadius, moonLightDir, 0.12);
   float craters = fbm2((auv - moonCenter) * 40.0 + uSeed * 5.0);
   vec3 moonColor = mix(vec3(0.82, 0.80, 0.78), vec3(0.62, 0.60, 0.58), smoothstep(0.35, 0.7, craters));
-  col += moonColor * moon.x * uSpaceT;
-  col = mix(col, moonColor, moon.y * uSpaceT);
+  col = mix(col, moonColor * moonShade, moonMask * uSpaceT);
 
   // Icy ridge silhouette, painted far to near.
   for (int i = 0; i < LAYERS; i++) {

@@ -75,13 +75,17 @@ void main() {
   col = mix(col, sunCol, sun.y);
   col += sunCol * glitter(auv, sunCenter.x, HORIZON) * 0.8;
 
-  // Space mode: a second moon, each light casting its own glitter streak.
+  // Space mode: a second moon, each light casting its own glitter streak. A
+  // crisp lit-sphere edge (shaded toward the actual sun in this scene) rather
+  // than celestialBody's soft self-luminous glow, since the moon is reflected
+  // light, not its own light source.
   float moonX = fract(sunX + 0.4) * aspect;
   vec2 moonCenter = vec2(moonX, HORIZON + 0.30);
-  vec2 moon = celestialBody(auv, moonCenter, 0.028, 0.35);
+  float moonRadius = 0.028;
+  float moonMask = hardDiscMask(auv, moonCenter, moonRadius);
+  float moonShade = litSphereShade(auv, moonCenter, moonRadius, normalize(sunCenter - moonCenter), 0.08);
   vec3 moonColor = vec3(0.80, 0.85, 0.90);
-  col += moonColor * moon.x * uSpaceT;
-  col = mix(col, moonColor, moon.y * uSpaceT);
+  col = mix(col, moonColor * moonShade, moonMask * uSpaceT);
   col += moonColor * glitter(auv, moonCenter.x, HORIZON) * 0.6 * uSpaceT;
 
   // Wave layers, painted far to near, each with a foam crest highlight.
