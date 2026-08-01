@@ -7,15 +7,21 @@ export default function StartMenu({
   onToggle,
   buttonRef,
   ref,
-  backgroundThemeLabel,
-  onCycleBackground,
+  themes,
+  activeThemeId,
+  onSelectTheme,
+  spaceMode,
+  onToggleSpaceMode,
 }) {
   return (
     <div className={styles.start} ref={ref}>
       <StartButton expanded={expanded} onToggle={onToggle} ref={buttonRef} />
       <StartActions
-        backgroundThemeLabel={backgroundThemeLabel}
-        onCycleBackground={onCycleBackground}
+        themes={themes}
+        activeThemeId={activeThemeId}
+        onSelectTheme={onSelectTheme}
+        spaceMode={spaceMode}
+        onToggleSpaceMode={onToggleSpaceMode}
       />
     </div>
   );

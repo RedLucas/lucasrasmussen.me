@@ -1,23 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Route, Routes } from 'react-router';
-import { Tooltip } from 'react-tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import StartMenu from './components/StartMenu.jsx';
 import Grid from './components/Grid.jsx';
 import Resume from './components/Resume.jsx';
 import BurnTransition from './components/BurnTransition.jsx';
-import { TOOLTIP_ID } from './constants.js';
-import { useBackgroundTheme } from './backgrounds.js';
+import { BACKGROUND_THEMES, useBackgroundTheme } from './backgrounds.js';
+import { useSpaceMode } from './spaceMode.js';
 import styles from './App.module.scss';
-import 'react-tooltip/dist/react-tooltip.css';
 
 export default function App() {
   // There's no more grow/shrink morph, so opening and showing the resume
   // happen together — a single `open` state replaces the old
   // expanded/showResume pair entirely.
   const [open, setOpen] = useState(false);
-  const { theme, cycleTheme } = useBackgroundTheme();
+  const { theme, themeId, selectTheme } = useBackgroundTheme();
+  const { spaceMode, toggleSpaceMode } = useSpaceMode();
   const [burning, setBurning] = useState(false);
   // Separate from `burning`: setup (compile/capture/texture-upload) can take
   // a while, especially on slower devices. Only flip the resume/modal hidden
@@ -90,7 +89,7 @@ export default function App() {
 
   return (
     <div className={styles.app} onClick={handleBackdropClick}>
-      <theme.Component />
+      <theme.Component spaceMode={spaceMode} />
       {open && (
         <div
           ref={modalRef}
@@ -121,7 +120,7 @@ export default function App() {
               sourceNodeRef={resumeRef}
               onComplete={handleBurnComplete}
               onReady={handleBurnReady}
-              durationMs={1100}
+              durationMs={1600}
             />
           )}
         </div>
@@ -134,10 +133,12 @@ export default function App() {
         buttonRef={startButtonRef}
         expanded={open}
         onToggle={toggleResume}
-        backgroundThemeLabel={theme.label}
-        onCycleBackground={cycleTheme}
+        themes={BACKGROUND_THEMES}
+        activeThemeId={themeId}
+        onSelectTheme={selectTheme}
+        spaceMode={spaceMode}
+        onToggleSpaceMode={toggleSpaceMode}
       />
-      <Tooltip id={TOOLTIP_ID} className="app-tooltip" classNameArrow="app-tooltip-arrow" />
     </div>
   );
 }

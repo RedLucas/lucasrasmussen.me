@@ -69,7 +69,7 @@ void main() {
 
   // Positive: not yet burned. Negative: already gone.
   float dist = (front + roughness) - uProgress;
-  float edgeWidth = 0.05;
+  float edgeWidth = 0.075;
 
   // Curl: just ahead of the front, warp the sampled texture coordinate
   // toward the ignition point and darken slightly, so the paper reads as
@@ -95,15 +95,19 @@ void main() {
   }
 
   if (dist > 0.0) {
-    // Active ember edge: blend toward a hot core. uProgress itself
-    // advances every frame, so sampling noise against it gives a genuine
-    // flicker rather than a static gradient.
+    // Active ember edge: blend toward a hot core, plus a genuine additive
+    // bloom right at the peak so the hottest point actually reads as
+    // blown-out bright rather than just a flat saturated color. uProgress
+    // itself advances every frame, so sampling noise against it gives a
+    // real flicker rather than a static gradient.
     float edgeT = 1.0 - dist / edgeWidth;
     float flicker = fbm2(auv * 30.0 + uProgress * 40.0 + uSeed * 7.0);
-    vec3 emberCore = vec3(1.0, 0.92, 0.55);
-    vec3 emberOuter = vec3(0.85, 0.22, 0.05);
-    vec3 ember = mix(emberOuter, emberCore, clamp(flicker * 1.4, 0.0, 1.0));
-    gl_FragColor = vec4(mix(src.rgb, ember, edgeT), src.a);
+    vec3 emberCore = vec3(1.0, 0.75, 0.15);
+    vec3 emberOuter = vec3(0.95, 0.12, 0.02);
+    vec3 ember = mix(emberOuter, emberCore, clamp(flicker * 1.5, 0.0, 1.0));
+    vec3 blended = mix(src.rgb, ember, edgeT);
+    blended += ember * pow(edgeT, 1.5) * 0.55;
+    gl_FragColor = vec4(blended, src.a);
     return;
   }
 
@@ -114,20 +118,21 @@ void main() {
   vec3 charColor = mix(vec3(0.05, 0.03, 0.02), vec3(0.0), charT);
   float charAlpha = src.a * (1.0 - smoothstep(0.0, 1.0, charT));
 
-  // Smoke: a wispy trail that rises just behind the char front and lingers
-  // after the paper there is already fully gone, independent of charAlpha
-  // (which has already faded to 0 by this point). `age` is how far past the
-  // front this pixel sits — a stand-in for "how long ago this patch burned",
-  // since a stateless per-pixel shader has no real burn history to read.
-  // The envelope rises fast, then decays over roughly half a burn-duration
-  // so the last patch to burn still gets time to visibly dissipate before
-  // BurnTransition's completion cutoff (see finishAt in BurnTransition.jsx).
+  // Smoke: a thick wispy trail that rises just behind the char front and
+  // lingers well after the paper there is already fully gone, independent
+  // of charAlpha (which has already faded to 0 by this point). `age` is how
+  // far past the front this pixel sits — a stand-in for "how long ago this
+  // patch burned", since a stateless per-pixel shader has no real burn
+  // history to read. The envelope rises fast, then decays slowly enough
+  // that every burn visibly leaves smoke behind rather than a quick wisp;
+  // BurnTransition's completion cutoff (finishAt) is sized to give the last
+  // patch to burn time to fully dissipate before it fires.
   float age = -dist;
-  float envelope = smoothstep(0.0, 0.04, age) * exp(-age * 6.0);
+  float envelope = smoothstep(0.0, 0.04, age) * exp(-age * 3.3);
   vec2 driftUv = auv * 5.0 + vec2(0.6, -1.0) * (age + uProgress * 0.6) + uSeed * 23.0;
   float wisp = fbm2(driftUv);
-  wisp = smoothstep(0.4, 0.8, wisp);
-  float smokeAlpha = envelope * wisp * 0.32;
+  wisp = smoothstep(0.35, 0.75, wisp);
+  float smokeAlpha = envelope * wisp * 0.5;
   vec3 smokeColor = vec3(0.5, 0.49, 0.47);
 
   vec3 finalColor = mix(charColor, smokeColor, smokeAlpha);
