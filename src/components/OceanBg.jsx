@@ -3,6 +3,7 @@ import vertSource from '../shaders/landscape.vert?raw';
 import commonSource from '../shaders/common.glsl?raw';
 import themeFragSource from '../shaders/ocean.frag?raw';
 import { createSpaceRamp } from '../spaceRamp.js';
+import { getSceneSeed } from '../seed.js';
 import styles from './LandscapeBg.module.scss';
 
 // common.glsl isn't a real GLSL module — just a text prefix every theme
@@ -84,7 +85,7 @@ export default function OceanBg({ spaceMode = false }) {
     gl.useProgram(program);
     gl.enableVertexAttribArray(aPosition);
     gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform1f(uSeed, Math.random() * 100);
+    gl.uniform1f(uSeed, getSceneSeed());
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
