@@ -42,11 +42,26 @@
   }
 }
 
+// Sizing the sheet as a share of the viewport just inherits the display's
+// shape — a 16:9 letterbox on a monitor, a sliver on a phone. Give it its own
+// proportions instead, capped on both axes.
+//
+// Portrait and narrow screens: a sheet filling most of the display.
 .resume {
   border-radius: 15px;
-  min-width: 80vw;
+  width: min(94vw, 38rem);
+  height: min(90vh, 52rem);
   max-width: 100%;
-  min-height: 80vh;
+}
+
+// Given room to spread, it becomes a document window rather than a tall sheet.
+// The middle term caps width against height, so a short landscape window
+// stretches into a letterbox no more than a wide one does.
+@media (min-aspect-ratio: 1 / 1) {
+  .resume {
+    width: min(90vw, calc(86vh * 1.7), 68rem);
+    height: min(86vh, 46rem);
+  }
 }
 
 .pulser {
