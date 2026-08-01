@@ -153,6 +153,17 @@ void main() {
   float ringMask = smoothstep(planetRadius * 1.55, planetRadius * 1.7, ringDist) -
                     smoothstep(planetRadius * 2.25, planetRadius * 2.5, ringDist);
 
+  // A flat 2D annulus has no notion of "behind" anything on its own — the
+  // ring's own ellipse dips inside the planet's circular radius near its
+  // top and bottom (the y-squash above), so without splitting it into two
+  // halves composited on either side of the planet, that overlap either
+  // gets hidden equally on both sides (reads as a flat halo, not a ring) or
+  // not at all. The near half is drawn after the planet so it crosses in
+  // front like an actual ring; the far half is drawn before, so the
+  // planet's own disc naturally occludes it.
+  float ringFar = ringMask * step(0.0, planetUv.y);
+  float ringNear = ringMask * step(planetUv.y, 0.0);
+
   // The planet isn't self-luminous like a sun/moon, so it's lit rather than
   // flat-colored: a shared lit-sphere helper gives it a real day/night
   // terminator (shaded toward the actual sun direction) with a crisp solid
@@ -168,8 +179,9 @@ void main() {
   float ringLight = clamp(dot(normalize(planetUv), sunDir) * 0.5 + 0.5, 0.0, 1.0);
   vec3 ringColor = vec3(0.68, 0.58, 0.52) * mix(0.35, 1.0, ringLight);
 
-  col = mix(col, ringColor, ringMask * uSpaceT * 0.55);
+  col = mix(col, ringColor, ringFar * uSpaceT * 0.55);
   col = mix(col, planetColor, planetMask * uSpaceT);
+  col = mix(col, ringColor, ringNear * uSpaceT * 0.55);
 
   // Moons: same lit-sphere + hard-edge treatment as the planet, each shaded
   // toward its own direction to the sun rather than glowing on their own.
