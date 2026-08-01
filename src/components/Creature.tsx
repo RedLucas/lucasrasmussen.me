@@ -1,13 +1,13 @@
-import { useMemo, type CSSProperties } from 'react';
-import type { IconType } from 'react-icons';
+import { useMemo, type ReactNode } from 'react';
 import { getSceneSeed } from '../seed';
 import styles from './Creature.module.scss';
+import type { CreatureSvgProps } from './creatures/types';
 
-export type CreatureMotion = 'flap' | 'bob' | 'undulate';
+type CreatureComponent = (props: CreatureSvgProps) => ReactNode;
 
 export interface CreatureProps {
-  Normal: IconType;
-  Alien: IconType;
+  Normal: CreatureComponent;
+  Alien: CreatureComponent;
   normalColor: string;
   alienColor: string;
   spaceMode: boolean;
@@ -18,10 +18,6 @@ export interface CreatureProps {
   // aurora well above it) need the alien variant somewhere else entirely.
   alienTop?: string;
   duration: number;
-  motion: CreatureMotion;
-  // Defaults to `motion` — most pairs share a gait, but a few (e.g. a
-  // walking camel cross-fading to an undulating sandworm) need their own.
-  alienMotion?: CreatureMotion;
   // Whether this variant drifts a little in altitude/current on its own,
   // independent of its gait (see the `.wander` comment in the stylesheet).
   // Defaults to true — most creatures are airborne or aquatic. Ground
@@ -36,9 +32,9 @@ export interface CreatureProps {
   glow?: boolean;
 }
 
-// A small vector silhouette (from react-icons' game-icons collection —
-// professionally drawn and immediately recognizable, unlike a hand-rolled
-// shader silhouette) drifting across its theme, cross-fading to an alien
+// A small rigged SVG creature (see ./creatures — a static body plus a
+// handful of separately-animated parts, each pivoting from its own hip/
+// shoulder/tail-base) drifting across its theme, cross-fading to an alien
 // counterpart in space mode exactly like every other space-mode element in
 // these scenes. Positioned as a plain DOM overlay above the WebGL canvas
 // rather than drawn inside the shader — there's no way to sample the
@@ -46,13 +42,13 @@ export interface CreatureProps {
 // creatures sit at a fixed height near the horizon rather than tracking the
 // exact procedural ridge silhouette underneath them.
 //
-// Motion is layered across up to three independent elements so none of them
-// fight over the same CSS property: `.track` drives horizontal drift
-// (`left`/`right`, not `transform`); an optional `.wander` wrapper drifts
-// vertically on its own slow timescale for airborne/aquatic creatures; and
-// the innermost `.icon` plays the fast gait cycle (`transform`). Static
-// mirror/glow styling lives directly on the icon's own inline style, one
-// level deeper still.
+// Only two motion layers live here: `.track` drives horizontal drift
+// (`left`/`right`, not `transform`), and an optional `.wander` wrapper
+// drifts vertically on its own slow timescale for airborne/aquatic
+// creatures. The actual gait (leg/wing/fin articulation) is internal to
+// each creature component now, not applied externally — a single flat icon
+// could only wobble as one rigid shape, but a multi-part rig needs each
+// part animating independently, which has to live inside the SVG itself.
 export default function Creature({
   Normal,
   Alien,
@@ -63,8 +59,6 @@ export default function Creature({
   top,
   alienTop,
   duration,
-  motion,
-  alienMotion,
   wander = true,
   alienWander,
   reverse = false,
@@ -100,19 +94,6 @@ export default function Creature({
     animationDelay: `${wanderDelay}s`,
   };
 
-  const renderIcon = (
-    Icon: IconType,
-    color: string,
-    gait: CreatureMotion,
-    style: CSSProperties | undefined,
-  ) => (
-    <div className={`${styles.icon} ${styles[gait]}`}>
-      <Icon size={size} color={color} style={style} />
-    </div>
-  );
-
-  const normalGait = motion;
-  const alienGait = alienMotion ?? motion;
   const normalWander = wander;
   const alienWanderResolved = alienWander ?? wander;
 
@@ -132,10 +113,10 @@ export default function Creature({
       >
         {normalWander ? (
           <div className={styles.wander} style={wanderStyle}>
-            {renderIcon(Normal, normalColor, normalGait, flipStyle)}
+            <Normal size={size} color={normalColor} style={flipStyle} />
           </div>
         ) : (
-          renderIcon(Normal, normalColor, normalGait, flipStyle)
+          <Normal size={size} color={normalColor} style={flipStyle} />
         )}
       </div>
       <div
@@ -152,10 +133,10 @@ export default function Creature({
       >
         {alienWanderResolved ? (
           <div className={styles.wander} style={wanderStyle}>
-            {renderIcon(Alien, alienColor, alienGait, alienFlipStyle)}
+            <Alien size={size} color={alienColor} style={alienFlipStyle} />
           </div>
         ) : (
-          renderIcon(Alien, alienColor, alienGait, alienFlipStyle)
+          <Alien size={size} color={alienColor} style={alienFlipStyle} />
         )}
       </div>
     </>

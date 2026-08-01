@@ -1,11 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { GiPolarBear, GiMantaRay } from 'react-icons/gi';
 import vertSource from '../shaders/landscape.vert?raw';
 import commonSource from '../shaders/common.glsl?raw';
 import themeFragSource from '../shaders/tundra.frag?raw';
 import { createSpaceRamp } from '../spaceRamp';
 import { getSceneSeed } from '../seed';
 import Creature from './Creature';
+import PolarBear from './creatures/PolarBear';
+import MantaRay from './creatures/MantaRay';
 import styles from './LandscapeBg.module.scss';
 import type { BackgroundThemeComponentProps } from '../backgrounds';
 
@@ -175,8 +176,8 @@ export default function TundraBg({ spaceMode = false }: BackgroundThemeComponent
     <>
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
       <Creature
-        Normal={GiPolarBear}
-        Alien={GiMantaRay}
+        Normal={PolarBear}
+        Alien={MantaRay}
         normalColor="#b8bdc2"
         alienColor="#7ea8ff"
         spaceMode={spaceMode}
@@ -184,8 +185,6 @@ export default function TundraBg({ spaceMode = false }: BackgroundThemeComponent
         top="74%"
         alienTop="20%"
         duration={40}
-        motion="bob"
-        alienMotion="undulate"
         wander={false}
         alienWander
         glow
