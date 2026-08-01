@@ -58,6 +58,52 @@ Palette mixPalette(Palette a, Palette b, float t) {
   );
 }
 
+// --- creatures -----------------------------------------------------------
+
+// A hawk gliding across the sky: a body plus two wings that flap slowly
+// from the shoulder, looping across in its own lane.
+float hawkMask(vec2 auv, float aspect) {
+  float speed = 0.028;
+  float travel = fract(uTime * speed + uSeed * 6.0);
+  float xRange = aspect + 0.3;
+  float x = travel * xRange - 0.15;
+  float y = 0.72 + sin(uTime * 0.4 + uSeed * 2.0) * 0.03;
+  vec2 shoulder = vec2(x, y);
+  vec2 tail = shoulder - vec2(0.03, 0.0);
+  float body = capsuleMask(auv, shoulder, tail, 0.006);
+
+  float flap = sin(uTime * 2.2 + uSeed) * 0.5;
+  vec2 wingDirL = normalize(vec2(-0.8, 0.35 + flap));
+  vec2 wingDirR = normalize(vec2(0.8, 0.35 + flap));
+  vec2 wingL = shoulder + wingDirL * 0.028;
+  vec2 wingR = shoulder + wingDirR * 0.028;
+  float wl = capsuleMask(auv, shoulder, wingL, 0.005);
+  float wr = capsuleMask(auv, shoulder, wingR, 0.005);
+  return max(body, max(wl, wr));
+}
+
+// Space mode: a bioluminescent alien flyer on its own lane, wingtips
+// returned so the caller can add a soft glow trail at each one.
+float alienFlyerMask(vec2 auv, float aspect, out vec2 wingTipL, out vec2 wingTipR) {
+  float speed = 0.024;
+  float travel = fract(uTime * speed + uSeed * 9.0 + 0.5);
+  float xRange = aspect + 0.3;
+  float x = travel * xRange - 0.15;
+  float y = 0.68 + sin(uTime * 0.35 + uSeed * 3.0) * 0.04;
+  vec2 shoulder = vec2(x, y);
+  vec2 tail = shoulder - vec2(0.026, 0.0);
+  float body = capsuleMask(auv, shoulder, tail, 0.005);
+
+  float flap = sin(uTime * 1.6 + uSeed * 1.3) * 0.5;
+  vec2 dirL = normalize(vec2(-0.8, 0.3 + flap));
+  vec2 dirR = normalize(vec2(0.8, 0.3 + flap));
+  wingTipL = shoulder + dirL * 0.032;
+  wingTipR = shoulder + dirR * 0.032;
+  float wl = capsuleMask(auv, shoulder, wingTipL, 0.004);
+  float wr = capsuleMask(auv, shoulder, wingTipR, 0.004);
+  return max(body, max(wl, wr));
+}
+
 // --- scene -------------------------------------------------------------
 
 void main() {
@@ -128,6 +174,22 @@ void main() {
       col = ridge;
     }
   }
+
+  // Creatures: a gliding hawk in normal mode, cross-fading to a
+  // bioluminescent alien flyer (with a soft glowing wingtip trail) in space
+  // mode — the same "swap, don't stack" treatment as the binary-ember sun.
+  float hawkM = hawkMask(sunUv, aspect);
+  vec3 hawkColor = vec3(0.08, 0.05, 0.04);
+  col = mix(col, hawkColor, hawkM * (1.0 - uSpaceT));
+
+  vec2 wingTipL;
+  vec2 wingTipR;
+  float alienM = alienFlyerMask(sunUv, aspect, wingTipL, wingTipR);
+  vec3 alienColor = vec3(0.55, 0.85, 1.0);
+  float glowL = exp(-length(sunUv - wingTipL) * 140.0) * 0.4;
+  float glowR = exp(-length(sunUv - wingTipR) * 140.0) * 0.4;
+  col += alienColor * (glowL + glowR) * uSpaceT;
+  col = mix(col, alienColor, alienM * uSpaceT);
 
   // Ordered-ish dither: 8-bit output bands badly across a gradient this wide.
   col += (hash21(gl_FragCoord.xy) - 0.5) / 255.0;

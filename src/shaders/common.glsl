@@ -114,3 +114,19 @@ float hardDiscMask(vec2 uv, vec2 center, float radius) {
   float dist = length(uv - center);
   return 1.0 - smoothstep(radius * 0.94, radius * 1.04, dist);
 }
+
+// Distance from p to the segment a-b — the one shape every articulated
+// creature (wings, legs, fins, tentacles, bodies) below is built from.
+float sdSegment(vec2 p, vec2 a, vec2 b) {
+  vec2 pa = p - a;
+  vec2 ba = b - a;
+  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+  return length(pa - ba * h);
+}
+
+// Soft-edged capsule mask (radius r around segment a-b): 1 inside, 0
+// outside.
+float capsuleMask(vec2 p, vec2 a, vec2 b, float r) {
+  float d = sdSegment(p, a, b) - r;
+  return 1.0 - smoothstep(0.0, r * 0.6, d);
+}
