@@ -78,12 +78,33 @@ void main() {
   float ringMask =
     smoothstep(planetRadius * 1.55, planetRadius * 1.7, ringDist) *
     smoothstep(planetRadius * 2.5, planetRadius * 2.25, ringDist);
-  vec2 planet = celestialBody(auv, planetCenter, planetRadius, 0.2);
-  vec3 ringColor = vec3(0.68, 0.58, 0.52);
-  vec3 planetColor = vec3(0.78, 0.58, 0.46);
+
+  // The planet isn't self-luminous like a sun/moon, so it's lit rather than
+  // flat-colored: fake sphere geometry from the flat disc (a hemisphere's
+  // height at each point) and shade it against the actual direction to the
+  // sun in this scene, giving a real day/night terminator rather than a
+  // uniformly-bright disc.
+  float distToPlanet = length(planetUv);
+  float planetMask = smoothstep(planetRadius * 1.04, planetRadius * 0.94, distToPlanet);
+  vec2 pNorm = planetUv / planetRadius;
+  float sphereZ = sqrt(max(0.0, 1.0 - dot(pNorm, pNorm)));
+  vec3 sphereNormal = normalize(vec3(pNorm, sphereZ));
+  vec2 sunDir = normalize(sunCenter - planetCenter);
+  vec3 lightDir = normalize(vec3(sunDir, 0.4));
+  float lighting = clamp(dot(sphereNormal, lightDir), 0.0, 1.0);
+  float shade = mix(0.10, 1.0, pow(lighting, 0.8));
+  vec3 planetBase = vec3(0.78, 0.58, 0.46);
+  vec3 planetColor = planetBase * shade;
+  float planetGlow = exp(-distToPlanet * (0.5 / planetRadius)) * 0.15;
+
+  // Same sun direction, applied in-plane to the ring — the side nearer the
+  // sun reads brighter, the far side dimmer.
+  float ringLight = clamp(dot(normalize(planetUv), sunDir) * 0.5 + 0.5, 0.0, 1.0);
+  vec3 ringColor = vec3(0.68, 0.58, 0.52) * mix(0.35, 1.0, ringLight);
+
   col = mix(col, ringColor, ringMask * uSpaceT * 0.55);
-  col += planetColor * planet.x * uSpaceT;
-  col = mix(col, planetColor, planet.y * uSpaceT);
+  col += planetBase * planetGlow * uSpaceT;
+  col = mix(col, planetColor, planetMask * uSpaceT);
 
   vec2 moonA = celestialBody(auv, vec2(0.14 * aspect, HORIZON + 0.44), 0.013, 0.3);
   vec2 moonB = celestialBody(auv, vec2(0.88 * aspect, HORIZON + 0.14), 0.010, 0.3);

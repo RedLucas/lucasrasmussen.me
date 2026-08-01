@@ -123,7 +123,7 @@ export default function App() {
               sourceNodeRef={resumeRef}
               onComplete={handleBurnComplete}
               onReady={handleBurnReady}
-              durationMs={1100}
+              durationMs={1600}
             />
           )}
         </div>
