@@ -152,7 +152,7 @@ void main() {
   float moonX = fract(sunX + 0.4) * aspect;
   vec2 moonCenter = vec2(moonX, HORIZON + 0.30);
   float moonRadius = 0.028;
-  float moonMask = hardDiscMask(auv, moonCenter, moonRadius);
+  float moonMask = hardDiscMask(auv, moonCenter, moonRadius, uResolution);
   float moonShade = litSphereShade(auv, moonCenter, moonRadius, normalize(sunCenter - moonCenter), 0.08);
   vec3 moonColor = vec3(0.80, 0.85, 0.90);
   col = mix(col, moonColor * moonShade, moonMask * uSpaceT);

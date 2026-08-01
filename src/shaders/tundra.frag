@@ -123,7 +123,7 @@ void main() {
   vec2 moonCenter = vec2(0.72 * aspect, HORIZON + 0.10);
   float moonRadius = 0.075;
   vec2 moonLightDir = normalize(vec2(-0.5, 0.35));
-  float moonMask = hardDiscMask(auv, moonCenter, moonRadius);
+  float moonMask = hardDiscMask(auv, moonCenter, moonRadius, uResolution);
   float moonShade = litSphereShade(auv, moonCenter, moonRadius, moonLightDir, 0.12);
   float craters = fbm2((auv - moonCenter) * 40.0 + uSeed * 5.0);
   vec3 moonColor = mix(vec3(0.82, 0.80, 0.78), vec3(0.62, 0.60, 0.58), smoothstep(0.35, 0.7, craters));

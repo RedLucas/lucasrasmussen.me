@@ -169,7 +169,7 @@ void main() {
   // terminator (shaded toward the actual sun direction) with a crisp solid
   // edge, not celestialBody's soft self-luminous glow.
   float distToPlanet = length(planetUv);
-  float planetMask = hardDiscMask(auv, planetCenter, planetRadius);
+  float planetMask = hardDiscMask(auv, planetCenter, planetRadius, uResolution);
   float shade = litSphereShade(auv, planetCenter, planetRadius, sunDir, 0.10);
   vec3 planetBase = vec3(0.78, 0.58, 0.46);
   vec3 planetColor = planetBase * shade;
@@ -189,8 +189,8 @@ void main() {
   vec2 moonBCenter = vec2(0.88 * aspect, HORIZON + 0.14);
   float moonARadius = 0.016;
   float moonBRadius = 0.013;
-  float moonAMask = hardDiscMask(auv, moonACenter, moonARadius);
-  float moonBMask = hardDiscMask(auv, moonBCenter, moonBRadius);
+  float moonAMask = hardDiscMask(auv, moonACenter, moonARadius, uResolution);
+  float moonBMask = hardDiscMask(auv, moonBCenter, moonBRadius, uResolution);
   float moonAShade = litSphereShade(auv, moonACenter, moonARadius, normalize(sunCenter - moonACenter), 0.06);
   float moonBShade = litSphereShade(auv, moonBCenter, moonBRadius, normalize(sunCenter - moonBCenter), 0.06);
   vec3 moonColor = vec3(0.86, 0.84, 0.80);
