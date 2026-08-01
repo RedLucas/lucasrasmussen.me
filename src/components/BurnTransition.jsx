@@ -229,6 +229,7 @@ export default function BurnTransition({ sourceNodeRef, onComplete, onReady, dur
       const uProgress = gl.getUniformLocation(program, 'uProgress');
       const uSeed = gl.getUniformLocation(program, 'uSeed');
       const uOrigin = gl.getUniformLocation(program, 'uOrigin');
+      const uFinishAt = gl.getUniformLocation(program, 'uFinishAt');
       const uTexture = gl.getUniformLocation(program, 'uTexture');
 
       gl.viewport(0, 0, width, height);
@@ -244,11 +245,14 @@ export default function BurnTransition({ sourceNodeRef, onComplete, onReady, dur
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.uniform1i(uTexture, 0);
 
-      // Runs well past 1 so both the char/fade zone AND the smoke trail
-      // behind it (which now lingers noticeably longer after each patch
-      // finishes charring — see burn.frag's slower decay) have time to
-      // fully clear before the completion handler tears everything down.
-      const finishAt = 2.1;
+      // Runs past 1 so the fire has time to fully sweep every corner
+      // (worst case, for an ignition point in one corner, is just past 1.2)
+      // before burn.frag's own final dissolve (the last ~28% of this range)
+      // kicks in — smoke no longer decays on its own, so this cutoff is
+      // sized for "fire fully spread, then one clean fade," not "wait for
+      // per-pixel decay to finish."
+      const finishAt = 1.8;
+      gl.uniform1f(uFinishAt, finishAt);
 
       const loop = (now) => {
         if (cancelled) return;
