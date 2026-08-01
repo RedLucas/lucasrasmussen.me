@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Route, Routes } from 'react-router';
-import { Tooltip } from 'react-tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import StartMenu from './components/StartMenu.jsx';
 import Grid from './components/Grid.jsx';
 import Resume from './components/Resume.jsx';
 import BurnTransition from './components/BurnTransition.jsx';
-import { TOOLTIP_ID } from './constants.js';
 import { BACKGROUND_THEMES, useBackgroundTheme } from './backgrounds.js';
 import { useSpaceMode } from './spaceMode.js';
 import styles from './App.module.scss';
-import 'react-tooltip/dist/react-tooltip.css';
 
 export default function App() {
   // There's no more grow/shrink morph, so opening and showing the resume
@@ -142,7 +139,6 @@ export default function App() {
         spaceMode={spaceMode}
         onToggleSpaceMode={toggleSpaceMode}
       />
-      <Tooltip id={TOOLTIP_ID} className="app-tooltip" classNameArrow="app-tooltip-arrow" />
     </div>
   );
 }

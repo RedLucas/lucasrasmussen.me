@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPanorama, faCheck } from '@fortawesome/free-solid-svg-icons';
-import { TOOLTIP_ID } from '../constants.js';
 import styles from './BackgroundMenu.module.scss';
 
 // Mirrors the idioms App.jsx already uses for the résumé modal (Escape to
@@ -13,8 +12,6 @@ export default function BackgroundMenu({ themes, activeId, onSelect }) {
   const wrapperRef = useRef(null);
   const triggerRef = useRef(null);
   const itemRefs = useRef([]);
-
-  const activeTheme = themes.find((theme) => theme.id === activeId) ?? themes[0];
 
   const close = () => {
     setOpen(false);
@@ -78,9 +75,6 @@ export default function BackgroundMenu({ themes, activeId, onSelect }) {
         aria-expanded={open}
         aria-label="Change background"
         onClick={() => setOpen((current) => !current)}
-        data-tooltip-id={TOOLTIP_ID}
-        data-tooltip-content={`Background: ${activeTheme.label}`}
-        data-tooltip-place="top-start"
       >
         <FontAwesomeIcon icon={faPanorama} />
       </button>

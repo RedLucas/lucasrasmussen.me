@@ -1,6 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShower, faRocket } from '@fortawesome/free-solid-svg-icons';
-import { TOOLTIP_ID } from '../constants.js';
 import BackgroundMenu from './BackgroundMenu.jsx';
 import styles from './StartActions.module.scss';
 
@@ -21,15 +20,7 @@ export default function StartActions({
 }) {
   return (
     <div className={styles.actions}>
-      <button
-        type="button"
-        aria-label="Clear Cache"
-        className={styles.action}
-        onClick={clearCache}
-        data-tooltip-id={TOOLTIP_ID}
-        data-tooltip-content="Clean Caches"
-        data-tooltip-place="top-start"
-      >
+      <button type="button" aria-label="Clear Cache" className={styles.action} onClick={clearCache}>
         <FontAwesomeIcon icon={faShower} />
       </button>
       <BackgroundMenu themes={themes} activeId={activeThemeId} onSelect={onSelectTheme} />
@@ -39,9 +30,6 @@ export default function StartActions({
         aria-pressed={spaceMode}
         className={styles.action}
         onClick={onToggleSpaceMode}
-        data-tooltip-id={TOOLTIP_ID}
-        data-tooltip-content={`Space Mode: ${spaceMode ? 'On' : 'Off'}`}
-        data-tooltip-place="top-start"
       >
         <FontAwesomeIcon icon={faRocket} />
       </button>
