@@ -4,6 +4,13 @@
   "name": "lucasrasmussen-me",
   "compatibility_date": "2026-08-01",
 
+  // Serves <version>-lucasrasmussen-me.<subdomain>.workers.dev preview URLs
+  // per branch/PR. This half is repo-config; the other half (Workers Builds
+  // actually building non-production branches, and posting the URL as a PR
+  // comment) is a dashboard-only setting — see Settings > Build > Branch
+  // control > "Builds for non-production branches" on the Worker.
+  "preview_urls": true,
+
   // This is a static SPA with no server-side Worker code, so there is no
   // `main` entrypoint — Cloudflare's asset server handles every request
   // directly from the Vite build output.
