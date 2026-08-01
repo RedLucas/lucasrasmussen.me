@@ -11,12 +11,25 @@ export default function Camel({ size, color, style }: CreatureSvgProps) {
           <line
             x1="0"
             y1="0"
-            x2="-7"
-            y2="21"
+            x2="0"
+            y2="11"
             stroke={color}
             strokeWidth="4.5"
             strokeLinecap="round"
           />
+          <g transform="translate(0,11)">
+            <g className={rig.kneeA} style={{ transformOrigin: '0 0' }}>
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="11"
+                stroke={color}
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </g>
+          </g>
         </g>
       </g>
       <g transform="translate(61,45)">
@@ -24,12 +37,25 @@ export default function Camel({ size, color, style }: CreatureSvgProps) {
           <line
             x1="0"
             y1="0"
-            x2="7"
-            y2="21"
+            x2="0"
+            y2="11"
             stroke={color}
             strokeWidth="4.5"
             strokeLinecap="round"
           />
+          <g transform="translate(0,11)">
+            <g className={rig.kneeB} style={{ transformOrigin: '0 0' }}>
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="11"
+                stroke={color}
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+            </g>
+          </g>
         </g>
       </g>
 

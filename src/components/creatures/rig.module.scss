@@ -44,6 +44,44 @@
   animation: legSwingB 1.1s ease-in-out infinite;
 }
 
+// A knee joint nested inside each leg (a second segment, translated to the
+// first segment's own end) — a single rigid leg swinging from one pivot
+// reads as a stiff pendulum, not a walk. The knee bends only during its
+// own leg's forward/lift half of the stride and stays straight through the
+// planted/push half, timed to the *same* 1.1s cycle as legSwingA/B so the
+// bend and the swing stay locked together.
+@keyframes kneeBendA {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(30deg);
+  }
+}
+
+@keyframes kneeBendB {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  75% {
+    transform: rotate(30deg);
+  }
+}
+
+.kneeA {
+  animation: kneeBendA 1.1s ease-in-out infinite;
+}
+
+.kneeB {
+  animation: kneeBendB 1.1s ease-in-out infinite;
+}
+
 // A wingbeat: fast, deep downstroke, a slight overshoot on the recovery,
 // then a brief settle before the next beat — not a symmetric pulse. A left
 // wing (drawn extending toward -x from its shoulder) and a right wing
@@ -191,6 +229,8 @@
 @media (prefers-reduced-motion: reduce) {
   .legA,
   .legB,
+  .kneeA,
+  .kneeB,
   .wing,
   .wingMirror,
   .wingSlow,

@@ -1,28 +1,29 @@
 import rig from './rig.module.scss';
 import type { CreatureSvgProps } from './types';
 
-// A gliding hawk: two wings flapping together (a fast, deep downstroke and
-// a slower recovery) from a shared shoulder point, either side of a static
-// body/head/tail silhouette.
+// A gliding hawk, seen in profile: body horizontal with the head facing
+// right (the default drift direction), wings spread above and below the
+// shoulder rather than left/right — a bird moving sideways across the
+// screen has to face sideways too, not stand on end.
 export default function Hawk({ size, color, style }: CreatureSvgProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 60" style={style} fill={color}>
-      <g transform="translate(50,26)">
+      <g transform="translate(46,30)">
         <g className={rig.wing} style={{ transformOrigin: '0 0' }}>
-          <path d="M 0,0 L -38,-9 L -32,3 L -10,7 Z" />
+          <path d="M 0,0 L -8,-32 L 4,-26 L 8,-8 Z" />
         </g>
       </g>
-      <g transform="translate(50,26)">
+      <g transform="translate(46,30)">
         <g className={rig.wingMirror} style={{ transformOrigin: '0 0' }}>
-          <path d="M 0,0 L 38,-9 L 32,3 L 10,7 Z" />
+          <path d="M 0,0 L -8,32 L 4,26 L 8,8 Z" />
         </g>
       </g>
 
       {/* Body, head, beak, tail — static silhouette. */}
-      <ellipse cx="50" cy="32" rx="7" ry="14" />
-      <circle cx="50" cy="15" r="6" />
-      <path d="M 47,10 L 40,12 L 47,15 Z" />
-      <path d="M 44,44 L 50,58 L 56,44 Z" />
+      <ellipse cx="46" cy="30" rx="16" ry="7" />
+      <circle cx="66" cy="28" r="6" />
+      <path d="M 70,25 L 79,28 L 70,31 Z" />
+      <path d="M 32,24 L 18,30 L 32,36 Z" />
     </svg>
   );
 }

@@ -11,12 +11,25 @@ export default function PolarBear({ size, color, style }: CreatureSvgProps) {
           <line
             x1="0"
             y1="0"
-            x2="-6"
-            y2="17"
+            x2="0"
+            y2="9"
             stroke={color}
             strokeWidth="6.5"
             strokeLinecap="round"
           />
+          <g transform="translate(0,9)">
+            <g className={rig.kneeA} style={{ transformOrigin: '0 0' }}>
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="9"
+                stroke={color}
+                strokeWidth="6"
+                strokeLinecap="round"
+              />
+            </g>
+          </g>
         </g>
       </g>
       <g transform="translate(63,42)">
@@ -24,12 +37,25 @@ export default function PolarBear({ size, color, style }: CreatureSvgProps) {
           <line
             x1="0"
             y1="0"
-            x2="6"
-            y2="17"
+            x2="0"
+            y2="9"
             stroke={color}
             strokeWidth="6.5"
             strokeLinecap="round"
           />
+          <g transform="translate(0,9)">
+            <g className={rig.kneeB} style={{ transformOrigin: '0 0' }}>
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="9"
+                stroke={color}
+                strokeWidth="6"
+                strokeLinecap="round"
+              />
+            </g>
+          </g>
         </g>
       </g>
 

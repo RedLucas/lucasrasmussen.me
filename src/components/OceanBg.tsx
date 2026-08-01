@@ -9,6 +9,7 @@ import FishSchool from './creatures/FishSchool';
 import Squid from './creatures/Squid';
 import Whale from './creatures/Whale';
 import Jellyfish from './creatures/Jellyfish';
+import WaveOverlay from './WaveOverlay';
 import styles from './LandscapeBg.module.scss';
 import type { BackgroundThemeComponentProps } from '../backgrounds';
 
@@ -200,6 +201,12 @@ export default function OceanBg({ spaceMode = false }: BackgroundThemeComponentP
         reverse
         glow
       />
+      {/* Foreground wave crests, drawn on top of the fish/whale so they
+          read as swimming beneath the surface texture rather than in
+          front of it — see WaveOverlay's own comment for why the shader's
+          own foam crests can't provide this on their own. */}
+      <WaveOverlay top="57%" />
+      <WaveOverlay top="65%" />
     </>
   );
 }

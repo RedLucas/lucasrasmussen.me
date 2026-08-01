@@ -1,26 +1,26 @@
 import rig from './rig.module.scss';
 import type { CreatureSvgProps } from './types';
 
-// A flying dove/bird: same synchronized wing-pair rig as the hawk, with a
-// rounder body and a small fanned tail.
+// A flying dove/bird, in profile: same synchronized wing-pair rig as the
+// hawk, body horizontal and facing right, with a small fanned tail behind.
 export default function Dove({ size, color, style }: CreatureSvgProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 60" style={style} fill={color}>
-      <g transform="translate(50,28)">
+      <g transform="translate(48,30)">
         <g className={rig.wing} style={{ transformOrigin: '0 0' }}>
-          <path d="M 0,0 L -34,-7 L -28,4 L -8,6 Z" />
+          <path d="M 0,0 L -7,-30 L 4,-24 L 6,-7 Z" />
         </g>
       </g>
-      <g transform="translate(50,28)">
+      <g transform="translate(48,30)">
         <g className={rig.wingMirror} style={{ transformOrigin: '0 0' }}>
-          <path d="M 0,0 L 34,-7 L 28,4 L 8,6 Z" />
+          <path d="M 0,0 L -7,30 L 4,24 L 6,7 Z" />
         </g>
       </g>
 
       {/* Body, head, tail — static silhouette. */}
-      <ellipse cx="49" cy="33" rx="9" ry="12" />
-      <circle cx="52" cy="18" r="6.5" />
-      <path d="M 44,42 L 49,54 L 54,42 Z" />
+      <ellipse cx="48" cy="30" rx="13" ry="8" />
+      <circle cx="65" cy="28" r="6.5" />
+      <path d="M 32,24 L 20,30 L 32,36 Z" />
     </svg>
   );
 }
