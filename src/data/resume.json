@@ -1,0 +1,174 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "Lucas Rasmussen",
+    "label": "Front-End Developer",
+    "summary": "A front-end developer, Lucas Rasmussen has gained much social experience in his time at the Kingston Taphouse. Graduate of the BCIT Technical Web Design Program with experience at all levels of the website development process, from graphic design to CMS. After making the decision to leave Advisor Websites, he joined the Marketing team at Moz as a Web Developer where he exceeded expectations in his role. Lucas was then moved to the Application Development team where he levelled up quickly to a software stack he’d previously been unfamiliar with. He became an important producing and source of knowledge to the rest of the team.",
+    "location": {
+      "city": "Vancouver",
+      "region": "BC",
+      "countryCode": "CA"
+    },
+    "profiles": []
+  },
+  "work": [
+    {
+      "name": "Moz",
+      "position": "Web Developer & Software Engineer II",
+      "location": "Vancouver, BC",
+      "startDate": "2020-11",
+      "endDate": "2024-12",
+      "highlights": [
+        "Identified and resolved cross-team technical issues spanning multiple teams and platforms.",
+        "Created the current navigation on moz.com, including allowing it to be completely Moz staff editable, while retaining visitor user login-state awareness.",
+        "Configured Cloudflare routing via Cloudflare Workers (workers were already in place) to implement new features, including image caching, redirect caching and enabling advanced features such as HTTP/3 throughout the website.",
+        "Rewrote user engagement features based on new designs and marketing goals, such as the SEO Expert quiz and the /top500 page to increase lead capturing.",
+        "Rewrote the checkout and login pages for the company product using a new NextJS application stack with Typescript and ReactJS, integrating with an ExpressJS backend and Stripe billing."
+      ],
+      "keywords": []
+    },
+    {
+      "name": "Advisor Websites",
+      "position": "Senior Full Stack Developer — Team Lead",
+      "location": "Vancouver, BC",
+      "startDate": "2015-02",
+      "endDate": "2020-11",
+      "highlights": [
+        "Used Javascript to create advanced functionality within Wordpress and Drupal websites.",
+        "Leveraged CSS preprocessors (LESS and SASS) to create atomic design standards.",
+        "Stood on the shoulders of front-end frameworks such as Bootstrap and Foundation to save time and build dynamic style guides to be followed by my team.",
+        "Utilized Gulp for rapid SASS compilation as well as templating using gulp-twig.",
+        "Made use of GIT for version control and expanded on our team’s workflow by introducing them to Sourcetree.",
+        "Used the Plugin and Block system within Drupal 8 to add innovative new functionality to a Drupal 8 based platform.",
+        "Created a new Drupal theming system using Pattern Lab as a base.",
+        "Implemented githook-based code sniffing workflows (using CodeClimate) in order to ensure better coding standards for every developer.",
+        "Reviewed most back-end and front-end code related to the company’s product.",
+        "Implemented a continuous integration workflow using Shippable in order to ensure pushed code has minimum bugs before pushing to production.",
+        "Managed a distributed team of up to 5 developers."
+      ],
+      "keywords": [
+        "Drupal 8",
+        "ESLint",
+        "Javascript",
+        "GIT",
+        "Gulp",
+        "JIRA",
+        "Pattern Lab",
+        "PHP",
+        "SASS",
+        "Twig",
+        "Typescript",
+        "ReactJS",
+        "NodeJS",
+        "ExpressJS"
+      ]
+    },
+    {
+      "name": "Advisor Websites",
+      "position": "Project Manager",
+      "location": "Vancouver, BC",
+      "startDate": "2014-01",
+      "endDate": "2015-02",
+      "highlights": [
+        "Managed the communications between the clients and the web designers.",
+        "Assisted the clients in achieving their website goals.",
+        "Troubleshooting complex problems for individuals’ websites."
+      ],
+      "keywords": ["CSS", "Drupal 6", "Javascript", "LESS", "Trello"]
+    },
+    {
+      "name": "Kingston Taphouse",
+      "position": "Website Manager",
+      "location": "Vancouver, BC",
+      "startDate": "2014-01",
+      "endDate": "2015-02",
+      "highlights": [
+        "Updated and maintained already live Wordpress website.",
+        "Created original graphics for hero as well as other locations on website."
+      ],
+      "keywords": ["CSS", "Wordpress", "Adobe Illustrator"]
+    },
+    {
+      "name": "Simply Computing",
+      "position": "Junior Buyer",
+      "location": "Vancouver, BC",
+      "startDate": "2011-12",
+      "endDate": "2012-07",
+      "highlights": [
+        "Promoted two times, from Customer Sales Representative, to Inventory Clerk and finally to Junior Buyer. Started at Simply July 2011.",
+        "Maintained inventory using complex CISPRO Point of Service System.",
+        "Showed ability to learn and create new methods of managing inventory efficiently using the system."
+      ],
+      "keywords": []
+    },
+    {
+      "name": "Kingston Taphouse",
+      "position": "Server Assistant",
+      "location": "Vancouver, BC",
+      "startDate": "2009-07",
+      "endDate": "2014-01",
+      "highlights": [
+        "Worked efficiently and calmly in a stressful high throughput environment.",
+        "Responded to my coworkers needing my help.",
+        "Counted back-bar stock and restocked every night."
+      ],
+      "keywords": []
+    }
+  ],
+  "education": [
+    {
+      "institution": "BCIT",
+      "location": "Vancouver, BC",
+      "area": "Technical Web Design",
+      "studyType": "Certificate of Completion with Distinction",
+      "startDate": "2013-07",
+      "endDate": "2013-12"
+    },
+    {
+      "institution": "Langara College",
+      "location": "Vancouver, BC",
+      "area": "Arts",
+      "studyType": "Associate Degree",
+      "startDate": "2009-09",
+      "endDate": "2012-06"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Languages & Markup",
+      "keywords": ["HTML", "CSS", "SASS", "Javascript", "Typescript", "PHP"]
+    },
+    {
+      "name": "Frameworks & Platforms",
+      "keywords": ["ReactJS", "NodeJS", "Drupal 8", "Foundation", "Twig", "Composer"]
+    },
+    {
+      "name": "Javascript",
+      "level": "Strong browser skills, intermediate in server-side implementations."
+    },
+    {
+      "name": "PHP",
+      "level": "OOP >= 7.0 only. Strong skills from in-work experience."
+    }
+  ],
+  "languages": [
+    {
+      "language": "English",
+      "fluency": "Native speaking"
+    },
+    {
+      "language": "French",
+      "fluency": "BC Dogwood certificate. Casual understanding in practise."
+    }
+  ],
+  "meta": {
+    "version": "v1.0.0",
+    "conferences": [
+      { "name": "DrupalCon", "year": "2017", "location": "Baltimore" },
+      { "name": "DrupalCon", "year": "2018", "location": "Nashville" },
+      { "name": "Drupal Pacific Summit", "year": "2017", "location": "Vancouver" },
+      { "name": "Confoo", "year": "2017", "location": "Vancouver" },
+      { "name": "Confoo", "year": "2018", "location": "Vancouver" }
+    ]
+  }
+}
