@@ -12,11 +12,12 @@ body,
 // The class is doubled to out-specify react-tooltip's own single-class rules,
 // which would otherwise win on source order.
 .app-tooltip.app-tooltip {
-  background: $menu-background;
+  background-color: #000;
+  background-image: $menu-background;
   color: #fff;
   border-radius: 15px;
   padding: 5px 10px 4px;
-  box-shadow: $box-shadow;
+  box-shadow: $box-shadow, $menu-highlight;
   font-family: 'Lato', sans-serif;
   opacity: 1;
   z-index: 10000;

@@ -13,6 +13,13 @@
     height: auto;
     width: 27px;
     background-color: #ffe3a6;
+    // A subtle gloss echoing the taskbar's new sheen, layered over the
+    // cream brand color rather than replacing it.
+    background-image: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0) 55%
+    );
     border-radius: 50%;
     transition: 0.25s box-shadow linear;
     box-shadow: $box-shadow;
