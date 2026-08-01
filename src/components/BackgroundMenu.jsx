@@ -60,9 +60,16 @@ export default function BackgroundMenu({ themes, activeId, onSelect }) {
   }, [open, themes, activeId]);
 
   // Tab-ing focus out of the menu (not just clicking away) should close it
-  // too — relatedTarget is the element focus is moving to.
+  // too — relatedTarget is the element focus is moving to. Only acts when
+  // relatedTarget is an actual element: on iOS Safari, buttons don't
+  // reliably receive focus from a tap, so tapping a different menu item can
+  // blur the previously-focused one with relatedTarget null — treating that
+  // as "focus left the menu" would close it before the tap's own click/
+  // onSelect had a chance to fire, silently eating the selection.
   const handleBlur = (event) => {
-    if (!wrapperRef.current?.contains(event.relatedTarget)) setOpen(false);
+    if (event.relatedTarget && !wrapperRef.current?.contains(event.relatedTarget)) {
+      setOpen(false);
+    }
   };
 
   return (
