@@ -9,6 +9,10 @@ yarn-error.log*
 .env
 .env.local
 
+# Wrangler local state (dev cache, credentials)
+.wrangler
+.dev.vars
+
 # Editor directories and files
 .idea
 *.suo
