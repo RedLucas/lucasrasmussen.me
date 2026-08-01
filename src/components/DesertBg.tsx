@@ -185,6 +185,7 @@ export default function DesertBg({ spaceMode = false }: BackgroundThemeComponent
         duration={38}
         motion="bob"
         alienMotion="undulate"
+        wander={false}
         glow
       />
     </>

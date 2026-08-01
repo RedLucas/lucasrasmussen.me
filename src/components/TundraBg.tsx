@@ -186,6 +186,8 @@ export default function TundraBg({ spaceMode = false }: BackgroundThemeComponent
         duration={40}
         motion="bob"
         alienMotion="undulate"
+        wander={false}
+        alienWander
         glow
       />
     </>
