@@ -1,11 +1,9 @@
-// A sheet of paper sitting inside the modal. Warm off-white ground, a fine
-// grain, and a notepad margin rule — enough to read as paper without tipping
-// into stationery pastiche.
+// The modal itself is the sheet of paper: one surface, edge to edge, with a
+// notepad margin rule and a fine grain. The layout answers to the panel's own
+// width rather than the viewport, so it reflows correctly regardless of how
+// large the modal happens to be.
 
 $paper: #fdfbf8;
-// The surface the sheet rests on. Warmer and a shade deeper than the paper,
-// so the sheet reads as an object rather than as the whole panel.
-$mat: #f0eae0;
 $ink: #241f1b;
 $ink-soft: #6e655c;
 $ink-faint: #a2988e;
@@ -24,12 +22,13 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
   inset: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background-color: $mat;
+  background-color: $paper;
   color: $ink;
   font-family: $sans;
   text-align: left;
   -webkit-font-smoothing: antialiased;
-  padding: 1.75rem;
+  // Everything below sizes against the panel, not the window.
+  container-type: inline-size;
 
   &:focus-visible {
     outline: 2px solid $accent;
@@ -37,22 +36,33 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
   }
 }
 
+// Full-height wrapper so the margin rule and grain span the whole document
+// rather than just the visible scroll window.
 .sheet {
+  --pad-left: clamp(2.4rem, 5cqi, 4rem);
+  --rule-x: calc(var(--pad-left) - 1.3rem);
+
   position: relative;
-  max-width: 46rem;
   min-height: 100%;
-  margin: 0 auto;
-  padding: 3.5rem 2.5rem 4rem 3.25rem;
+  padding:
+    clamp(1.75rem, 4cqi, 3.25rem)
+    clamp(1.5rem, 4cqi, 3rem)
+    clamp(2.5rem, 6cqi, 4rem)
+    var(--pad-left);
   display: flex;
   flex-direction: column;
-  gap: 2.75rem;
-  background-color: $paper;
-  // Lifted just enough to catch an edge; paper doesn't hover.
-  box-shadow:
-    0 1px 1px rgba(60, 45, 30, 0.06),
-    0 6px 20px rgba(60, 45, 30, 0.07);
+  gap: clamp(1.75rem, 3cqi, 2.5rem);
 
-  // Fine grain, clipped to the sheet so the surface stays flat.
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--rule-x);
+    width: 1px;
+    background: rgba(214, 67, 31, 0.16);
+  }
+
   &::after {
     content: '';
     position: absolute;
@@ -61,17 +71,30 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
     opacity: 0.04;
     pointer-events: none;
   }
+}
 
-  // The margin rule, sitting where a notepad's would.
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 1.75rem;
-    width: 1px;
-    background: rgba(214, 67, 31, 0.16);
-  }
+// --- columns ---
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: clamp(1.75rem, 4cqi, 3.25rem);
+  align-items: start;
+}
+
+.main,
+.aside {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.main {
+  gap: clamp(1.75rem, 3cqi, 2.5rem);
+}
+
+.aside {
+  gap: clamp(1.5rem, 2.5cqi, 2.25rem);
 }
 
 // --- header ---
@@ -85,7 +108,7 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
 .name {
   margin: 0;
   font-family: $serif;
-  font-size: 2.4rem;
+  font-size: clamp(1.9rem, 4.5cqi, 2.6rem);
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.015em;
@@ -129,7 +152,8 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
   font-size: 0.95rem;
   line-height: 1.7;
   color: $ink-soft;
-  max-width: 62ch;
+  // Keeps the lead paragraph at a readable measure in a wide panel.
+  max-width: 64ch;
 }
 
 // --- skills ---
@@ -169,23 +193,25 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
   border: 1px solid $rule;
   border-radius: 999px;
   color: $ink-soft;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.55);
   white-space: nowrap;
 }
 
 // --- definition-style notes, shared by skills and languages ---
 
 .notes {
-  margin: 0;
+  margin: 0.25rem 0 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
+// Stacked rather than inline: in a narrow column an inline term/description
+// pair wraps and strands its separator.
 .note {
   display: flex;
-  gap: 0.5rem;
-  align-items: baseline;
+  flex-direction: column;
+  gap: 0.1rem;
   font-size: 0.85rem;
   line-height: 1.55;
 }
@@ -193,21 +219,15 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
 .noteTerm {
   font-weight: 700;
   color: $ink;
-  flex: none;
-
-  &::after {
-    content: ' —';
-    color: $ink-faint;
-    font-weight: 400;
-  }
 }
 
 .noteDesc {
   margin: 0;
   color: $ink-soft;
+  min-width: 0;
 }
 
-// --- experience & education entries ---
+// --- entries ---
 
 .entries {
   display: flex;
@@ -254,7 +274,7 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
   align-items: baseline;
 }
 
-.orgLocation {
+.orgDetail {
   color: $ink-faint;
 
   &::before {
@@ -290,7 +310,8 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
 
   li {
     display: flex;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.4rem;
     align-items: baseline;
   }
 }
@@ -303,35 +324,22 @@ $sans: 'Lato', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans
   color: $ink-soft;
 }
 
-// --- responsive ---
+// --- reflow ---
 
-.split {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: 2.75rem;
+// Below this the two columns no longer have room to sit side by side.
+@container (max-width: 46rem) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-@media (max-width: 40rem) {
-  .paper {
-    padding: 0;
-  }
-
-  .sheet {
-    padding: 2.5rem 1.5rem 3rem 2rem;
-    gap: 2rem;
-    box-shadow: none;
-  }
-
-  .sheet::before {
-    left: 0.9rem;
-  }
-
-  .name {
-    font-size: 1.9rem;
-  }
-
+@container (max-width: 26rem) {
   .entryHead {
     flex-direction: column;
     gap: 0.15rem;
+  }
+
+  .summary {
+    font-size: 0.9rem;
   }
 }

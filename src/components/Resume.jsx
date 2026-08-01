@@ -30,6 +30,22 @@ function Section({ label, children }) {
   );
 }
 
+function Entry({ title, dates, subtitle, detail, children }) {
+  return (
+    <article className={styles.entry}>
+      <div className={styles.entryHead}>
+        <h3 className={styles.role}>{title}</h3>
+        <span className={styles.dates}>{dates}</span>
+      </div>
+      <p className={styles.org}>
+        {subtitle}
+        {detail && <span className={styles.orgDetail}>{detail}</span>}
+      </p>
+      {children}
+    </article>
+  );
+}
+
 export default function Resume() {
   const { basics, work, education, skills, languages, meta } = resume;
   const { city, region } = basics.location;
@@ -49,100 +65,95 @@ export default function Resume() {
           <p className={styles.meta}>{[city, region].filter(Boolean).join(', ')}</p>
         </header>
 
-        <Section label="Summary">
-          <p className={styles.summary}>{basics.summary}</p>
-        </Section>
+        <div className={styles.columns}>
+          <div className={styles.main}>
+            <Section label="Summary">
+              <p className={styles.summary}>{basics.summary}</p>
+            </Section>
 
-        <Section label="Skills">
-          <div className={styles.skillGroups}>
-            {skillGroups.map((group) => (
-              <div key={group.name} className={styles.skillGroup}>
-                <h3 className={styles.skillName}>{group.name}</h3>
-                <Chips items={group.keywords} />
+            <Section label="Experience">
+              <div className={styles.entries}>
+                {work.map((job) => (
+                  <Entry
+                    key={`${job.name}-${job.startDate}`}
+                    title={job.position}
+                    dates={`${formatDate(job.startDate)} – ${formatDate(job.endDate)}`}
+                    subtitle={job.name}
+                    detail={job.location}
+                  >
+                    {job.highlights?.length > 0 && (
+                      <ul className={styles.highlights}>
+                        {job.highlights.map((highlight) => (
+                          <li key={highlight}>{highlight}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {job.keywords?.length > 0 && <Chips items={job.keywords} />}
+                  </Entry>
+                ))}
               </div>
-            ))}
+            </Section>
           </div>
-          {skillNotes.length > 0 && (
-            <dl className={styles.notes}>
-              {skillNotes.map((note) => (
-                <div key={note.name} className={styles.note}>
-                  <dt className={styles.noteTerm}>{note.name}</dt>
-                  <dd className={styles.noteDesc}>{note.level}</dd>
-                </div>
-              ))}
-            </dl>
-          )}
-        </Section>
 
-        <Section label="Experience">
-          <div className={styles.entries}>
-            {work.map((job) => (
-              <article key={`${job.name}-${job.startDate}`} className={styles.entry}>
-                <div className={styles.entryHead}>
-                  <h3 className={styles.role}>{job.position}</h3>
-                  <span className={styles.dates}>
-                    {formatDate(job.startDate)} – {formatDate(job.endDate)}
-                  </span>
-                </div>
-                <p className={styles.org}>
-                  {job.name}
-                  {job.location && <span className={styles.orgLocation}>{job.location}</span>}
-                </p>
-                {job.highlights?.length > 0 && (
-                  <ul className={styles.highlights}>
-                    {job.highlights.map((highlight) => (
-                      <li key={highlight}>{highlight}</li>
-                    ))}
-                  </ul>
-                )}
-                {job.keywords?.length > 0 && <Chips items={job.keywords} />}
-              </article>
-            ))}
-          </div>
-        </Section>
+          <aside className={styles.aside}>
+            <Section label="Skills">
+              <div className={styles.skillGroups}>
+                {skillGroups.map((group) => (
+                  <div key={group.name} className={styles.skillGroup}>
+                    <h3 className={styles.skillName}>{group.name}</h3>
+                    <Chips items={group.keywords} />
+                  </div>
+                ))}
+              </div>
+              {skillNotes.length > 0 && (
+                <dl className={styles.notes}>
+                  {skillNotes.map((note) => (
+                    <div key={note.name} className={styles.note}>
+                      <dt className={styles.noteTerm}>{note.name}</dt>
+                      <dd className={styles.noteDesc}>{note.level}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </Section>
 
-        <Section label="Education">
-          <div className={styles.entries}>
-            {education.map((school) => (
-              <article key={school.institution} className={styles.entry}>
-                <div className={styles.entryHead}>
-                  <h3 className={styles.role}>{school.institution}</h3>
-                  <span className={styles.dates}>
-                    {formatDate(school.startDate)} – {formatDate(school.endDate)}
-                  </span>
-                </div>
-                <p className={styles.org}>
-                  {school.studyType}
-                  {school.area && <span className={styles.orgLocation}>{school.area}</span>}
-                </p>
-              </article>
-            ))}
-          </div>
-        </Section>
+            <Section label="Education">
+              <div className={styles.entries}>
+                {education.map((school) => (
+                  <Entry
+                    key={school.institution}
+                    title={school.institution}
+                    dates={`${formatDate(school.startDate)} – ${formatDate(school.endDate)}`}
+                    subtitle={school.studyType}
+                    detail={school.area}
+                  />
+                ))}
+              </div>
+            </Section>
 
-        <div className={styles.split}>
-          <Section label="Languages">
-            <dl className={styles.notes}>
-              {languages.map((entry) => (
-                <div key={entry.language} className={styles.note}>
-                  <dt className={styles.noteTerm}>{entry.language}</dt>
-                  <dd className={styles.noteDesc}>{entry.fluency}</dd>
-                </div>
-              ))}
-            </dl>
-          </Section>
+            <Section label="Languages">
+              <dl className={styles.notes}>
+                {languages.map((entry) => (
+                  <div key={entry.language} className={styles.note}>
+                    <dt className={styles.noteTerm}>{entry.language}</dt>
+                    <dd className={styles.noteDesc}>{entry.fluency}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Section>
 
-          <Section label="Conferences">
-            <ul className={styles.conferences}>
-              {conferences.map((conference) => (
-                <li key={`${conference.name}-${conference.year}`}>
-                  <span className={styles.conferenceName}>{conference.name}</span>
-                  <span className={styles.dates}>{conference.year}</span>
-                  <span className={styles.conferencePlace}>{conference.location}</span>
-                </li>
-              ))}
-            </ul>
-          </Section>
+            <Section label="Conferences">
+              <ul className={styles.conferences}>
+                {conferences.map((conference) => (
+                  <li key={`${conference.name}-${conference.year}`}>
+                    <span className={styles.conferenceName}>{conference.name}</span>
+                    <span className={styles.dates}>{conference.year}</span>
+                    <span className={styles.conferencePlace}>{conference.location}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          </aside>
         </div>
       </div>
     </article>
