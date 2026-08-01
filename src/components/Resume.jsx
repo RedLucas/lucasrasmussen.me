@@ -15,7 +15,9 @@ function Chips({ items }) {
   return (
     <ul className={styles.chips}>
       {items.map((item) => (
-        <li key={item} className={styles.chip}>{item}</li>
+        <li key={item} className={styles.chip}>
+          {item}
+        </li>
       ))}
     </ul>
   );

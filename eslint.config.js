@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
   { ignores: ['dist'] },
@@ -25,4 +26,7 @@ export default [
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  // Last, so it can disable any stylistic rule that would otherwise fight
+  // Prettier's formatting.
+  eslintConfigPrettier,
 ];
