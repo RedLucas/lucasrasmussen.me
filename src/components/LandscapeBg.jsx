@@ -4,10 +4,11 @@ import fragSource from '../shaders/landscape.frag?raw';
 import styles from './LandscapeBg.module.scss';
 
 // Ridge silhouettes have hard edges, so full retina resolution is visibly
-// sharper than a plain gradient would justify. Capped at 2 (rather than the
-// full devicePixelRatio) since 3x+ displays see essentially no further
-// improvement for the added fragment cost.
-const MAX_DPR = 2;
+// sharper than a plain gradient would justify — render at the device's
+// actual pixel density rather than downsampling. Capped at 3 purely as a
+// safety ceiling against pathological values (e.g. browser zoom inflating
+// devicePixelRatio well past what any real display panel uses).
+const MAX_DPR = 3;
 // A stylized day, not a real 24-hour one — fast enough that the sun's drift
 // is noticeable within a normal page visit, slow enough to still read as
 // ambient rather than an obvious animation.
