@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShower } from '@fortawesome/free-solid-svg-icons';
+import { faShower, faPanorama } from '@fortawesome/free-solid-svg-icons';
 import { TOOLTIP_ID } from '../constants.js';
 import styles from './StartActions.module.scss';
 
@@ -8,16 +8,22 @@ function clearCache() {
   window.location.reload();
 }
 
-const actions = [
-  {
-    name: 'Clear Cache',
-    action: clearCache,
-    icon: faShower,
-    tooltip: 'Clean Caches',
-  },
-];
+export default function StartActions({ backgroundThemeLabel, onCycleBackground }) {
+  const actions = [
+    {
+      name: 'Clear Cache',
+      action: clearCache,
+      icon: faShower,
+      tooltip: 'Clean Caches',
+    },
+    {
+      name: 'Change Background',
+      action: onCycleBackground,
+      icon: faPanorama,
+      tooltip: `Background: ${backgroundThemeLabel}`,
+    },
+  ];
 
-export default function StartActions() {
   return (
     <div className={styles.actions}>
       {actions

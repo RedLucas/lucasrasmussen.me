@@ -115,9 +115,11 @@ async function captureNode(node) {
   return image;
 }
 
-function randomDirection() {
-  const angle = Math.random() * Math.PI * 2;
-  return [Math.cos(angle), Math.sin(angle)];
+// A point anywhere on the page, in plain 0..1 uv space — the shader itself
+// aspect-corrects it (see burn.frag), so this doesn't need to know the
+// captured resume's actual width/height ratio.
+function randomOrigin() {
+  return [Math.random(), Math.random()];
 }
 
 // Burns away a snapshot of `sourceNode` with a WebGL shader, seeded
@@ -226,7 +228,7 @@ export default function BurnTransition({ sourceNodeRef, onComplete, onReady, dur
       const uResolution = gl.getUniformLocation(program, 'uResolution');
       const uProgress = gl.getUniformLocation(program, 'uProgress');
       const uSeed = gl.getUniformLocation(program, 'uSeed');
-      const uDirection = gl.getUniformLocation(program, 'uDirection');
+      const uOrigin = gl.getUniformLocation(program, 'uOrigin');
       const uTexture = gl.getUniformLocation(program, 'uTexture');
 
       gl.viewport(0, 0, width, height);
@@ -237,7 +239,7 @@ export default function BurnTransition({ sourceNodeRef, onComplete, onReady, dur
       gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
       gl.uniform2f(uResolution, width, height);
       gl.uniform1f(uSeed, Math.random() * 100);
-      gl.uniform2fv(uDirection, randomDirection());
+      gl.uniform2fv(uOrigin, randomOrigin());
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.uniform1i(uTexture, 0);

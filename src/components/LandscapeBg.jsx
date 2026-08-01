@@ -3,9 +3,11 @@ import vertSource from '../shaders/landscape.vert?raw';
 import fragSource from '../shaders/landscape.frag?raw';
 import styles from './LandscapeBg.module.scss';
 
-// Retina at full resolution buys almost nothing on a soft gradient like this
-// and costs a lot of fragment work, so cap it.
-const MAX_DPR = 1.5;
+// Ridge silhouettes have hard edges, so full retina resolution is visibly
+// sharper than a plain gradient would justify. Capped at 2 (rather than the
+// full devicePixelRatio) since 3x+ displays see essentially no further
+// improvement for the added fragment cost.
+const MAX_DPR = 2;
 const DAY_MS = 86400000;
 
 // Fraction of the current UTC day elapsed (0..1) — real wall-clock time, not

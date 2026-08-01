@@ -7,13 +7,16 @@
 // duration of the burn (see BurnTransition.jsx/App.jsx) — and a trail of
 // wispy smoke that lingers a little past each pixel's own char fade before
 // dissipating, independent of the (already-zero) char alpha underneath it.
+// The fire radiates outward from a random point on the page (uOrigin)
+// rather than sweeping edge to edge, and the paper warps/darkens slightly
+// just ahead of the front to read as curling away rather than dissolving flat.
 precision highp float;
 
 uniform sampler2D uTexture;
 uniform vec2 uResolution;
 uniform float uProgress; // 0 (untouched) -> past 1 (fully gone)
 uniform float uSeed;
-uniform vec2 uDirection; // unit vector, the sweep's overall direction
+uniform vec2 uOrigin; // ignition point, plain 0..1 uv space
 
 // --- noise (ported from landscape.frag) ---------------------------------
 
@@ -49,25 +52,42 @@ void main() {
   vec2 uv = gl_FragCoord.xy / uResolution;
   float aspect = uResolution.x / uResolution.y;
   vec2 auv = vec2(uv.x * aspect, uv.y);
-  vec2 center = vec2(0.5 * aspect, 0.5);
+  vec2 origin = vec2(uOrigin.x * aspect, uOrigin.y);
 
-  // Where this pixel sits along the sweep direction, normalized so the
-  // whole diagonal spans roughly 0..1 — this is what gives the burn an
-  // overall front rather than uniform popcorn dissolve.
+  // Radial distance from the random ignition point, normalized against the
+  // full diagonal so progress reaches every corner regardless of where the
+  // origin happens to land — this is what gives the burn an expanding front
+  // from a single point rather than a sweep from one edge to another.
   float diag = length(vec2(aspect, 1.0));
-  float front = dot(auv - center, uDirection) / diag + 0.5;
+  float front = length(auv - origin) / diag;
 
   // A coarse layer roughens the front's shape; a finer layer breaks up its
-  // edge so it reads as an organic char line, not a smooth arc.
+  // edge so it reads as an organic char line, not a smooth ring.
   float coarse = fbm2(auv * 2.2 + uSeed * 13.0) - 0.5;
   float fine = fbm2(auv * 9.0 + uSeed * 41.0 + 100.0) - 0.5;
   float roughness = coarse * 0.35 + fine * 0.12;
 
   // Positive: not yet burned. Negative: already gone.
   float dist = (front + roughness) - uProgress;
-
-  vec4 src = texture2D(uTexture, uv);
   float edgeWidth = 0.05;
+
+  // Curl: just ahead of the front, warp the sampled texture coordinate
+  // toward the ignition point and darken slightly, so the paper reads as
+  // lifting/rolling away from the fire rather than dissolving flat in
+  // place. curlT ramps 0 (untouched, far from the front) -> 1 (already
+  // past it), spread out over a much wider band than the ember edge itself
+  // so the lift is visible just before ignition, not only at the instant of.
+  float curlT = 1.0 - smoothstep(-edgeWidth * 2.0, edgeWidth * 5.0, dist);
+  vec2 towardOrigin = auv - origin;
+  float towardLen = length(towardOrigin);
+  vec2 curlDir = towardLen > 0.0001 ? towardOrigin / towardLen : vec2(0.0, 1.0);
+  vec2 curlPerp = vec2(-curlDir.y, curlDir.x);
+  float wobble = (fbm2(auv * 6.0 + uSeed * 19.0) - 0.5) * 0.6;
+  vec2 curlOffset = (-curlDir + curlPerp * wobble) * curlT * 0.045;
+  vec2 sampleUv = clamp(uv + vec2(curlOffset.x / aspect, curlOffset.y), 0.0, 1.0);
+
+  vec4 src = texture2D(uTexture, sampleUv);
+  src.rgb *= 1.0 - curlT * 0.35;
 
   if (dist > edgeWidth) {
     gl_FragColor = src;
