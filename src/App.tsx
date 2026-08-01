@@ -34,7 +34,27 @@ export default function App() {
   const resumeRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (open) resumeRef.current?.focus();
+    if (!open) return undefined;
+    const el = resumeRef.current;
+    if (!el) return undefined;
+    // Focus needs to land here so keyboard/AT users get the newly-opened
+    // content, but this specific call is scripted focus triggered from the
+    // Résumé button's click handler, not a real keyboard interaction with
+    // this element — Chromium's :focus-visible heuristic recognizes that
+    // and stays quiet, but Safari's doesn't, so this alone was enough to
+    // flash the accent outline around the whole panel on iOS. Suppress the
+    // ring only for this one programmatic focus; it's cleared on the
+    // panel's own next focus-related event, so a real subsequent keyboard
+    // focus (tabbing away and back) still rings normally.
+    el.dataset.justOpened = 'true';
+    el.focus();
+    const clearFlag = () => delete el.dataset.justOpened;
+    el.addEventListener('focus', clearFlag, { once: true });
+    el.addEventListener('blur', clearFlag, { once: true });
+    return () => {
+      el.removeEventListener('focus', clearFlag);
+      el.removeEventListener('blur', clearFlag);
+    };
   }, [open]);
 
   // Starts the burn rather than closing immediately. All four dismiss paths
