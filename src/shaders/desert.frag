@@ -117,7 +117,11 @@ void main() {
   col = mix(col, moonColor * moonAShade, moonAMask * uSpaceT);
   col = mix(col, moonColor * moonBShade, moonBMask * uSpaceT);
 
-  // Dune layers, painted far to near.
+  // Dune layers, painted far to near. Each is shaded by its own slope
+  // relative to the sun (a real sculpted light/shadow gradient across every
+  // mound) rather than flat color plus noise unrelated to the actual shape —
+  // the wind-ripple texture is now just a subtle grain on top of that, not
+  // the primary source of variation.
   for (int i = 0; i < LAYERS; i++) {
     float t = float(i) / float(LAYERS - 1);
 
@@ -125,16 +129,34 @@ void main() {
     float amp = mix(0.022, 0.10, t);
     float base = mix(HORIZON - 0.006, HORIZON - 0.16, t);
     float speed = mix(0.0015, 0.0110, t);
+    float phase = uTime * speed + uSeed * 9.0 + float(i) * 19.3;
 
-    float x = auv.x * freq + uTime * speed + uSeed * 9.0 + float(i) * 19.3;
+    float x = auv.x * freq + phase;
     float h = base + duneFbm(x) * amp;
 
     if (uv.y < h) {
-      vec3 ridge = mix(farDune, nearDune, t * t);
-      // Wind-ripple texture painted onto color only, not height.
+      // Central-difference slope of this layer's own height field, in
+      // screen space, so each dune face reads as tilting toward or away
+      // from the sun rather than being a uniformly flat color.
+      float dx = 0.001;
+      float hL = base + duneFbm(x - dx * freq) * amp;
+      float hR = base + duneFbm(x + dx * freq) * amp;
+      float slope = (hR - hL) / (2.0 * dx);
+      vec2 normal = normalize(vec2(-slope, 1.0));
+      vec2 lightDir = normalize(vec2(sunX * aspect - auv.x, 0.9));
+      float lighting = clamp(dot(normal, lightDir), 0.0, 1.0);
+      float slopeShade = mix(0.82, 1.12, pow(lighting, 1.2));
+
+      // Depth gradient: the crest catches full sun, but the dune's own bulk
+      // curves away from it and falls into its own shadow just below —
+      // without this, each layer reads as one flat fill down to the next
+      // ridge line rather than a rounded mound with actual volume.
+      float depthT = clamp((h - uv.y) / (amp * 1.4), 0.0, 1.0);
+      float depthShade = mix(1.08, 0.58, pow(depthT, 0.6));
+
+      vec3 ridge = mix(farDune, nearDune, t * t) * slopeShade * depthShade;
       float ripple = fbm2(vec2(auv.x * 42.0 + uSeed * 3.0, uv.y * 42.0 + float(i) * 5.0));
-      ridge *= 0.90 + 0.18 * ripple;
-      ridge *= 0.92 + 0.08 * smoothstep(base - amp, h, uv.y);
+      ridge *= 0.95 + 0.08 * ripple;
       col = ridge;
     }
   }

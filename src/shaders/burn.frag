@@ -133,15 +133,17 @@ void main() {
   float smokeAlpha = envelope * wisp * 0.55;
   vec3 smokeColor = vec3(0.5, 0.49, 0.47);
 
+  // Only smoke gets an explicit end fade, and only right at the very end —
+  // char is left alone, since it already burns down to fully transparent on
+  // its own as the front sweeps past (see charAlpha above). Fading the whole
+  // scene together, including paper that had already fully burnt away, read
+  // as the picture itself dissolving rather than the fire still working —
+  // smoke is the only thing here that doesn't clear on its own.
+  float smokeFade = smoothstep(uFinishAt * 0.85, uFinishAt, uProgress);
+  smokeAlpha *= 1.0 - smokeFade;
+
   vec3 finalColor = mix(charColor, smokeColor, smokeAlpha);
   float finalAlpha = max(charAlpha, smokeAlpha);
-
-  // Everything still visible (char + persistent smoke) dissolves together
-  // in one final pass right before BurnTransition's completion cutoff
-  // (uFinishAt), so the modal never gets yanked away with smoke still
-  // hanging in it — the fade is a deliberate last beat, not an early decay.
-  float fadeOut = smoothstep(uFinishAt * 0.72, uFinishAt, uProgress);
-  finalAlpha *= 1.0 - fadeOut;
 
   gl_FragColor = vec4(finalColor, finalAlpha);
 }
