@@ -15,47 +15,6 @@ uniform float uSpaceT; // 0 (normal) -> 1 (space mode), eased in JS
 
 const int LAYERS = 5;
 
-// A macaw flying between canopy gaps: fast colorful wing flap. Returns
-// (body, leftWing, rightWing) masks separately so each part can take its
-// own color in main() instead of one flat silhouette color.
-vec3 macawMask(vec2 auv, float aspect) {
-  float speed = 0.05;
-  float travel = fract(uTime * speed + uSeed * 4.0);
-  float xRange = aspect + 0.3;
-  float x = travel * xRange - 0.15;
-  float y = 0.55 + sin(uTime * 0.5 + uSeed * 2.0) * 0.08;
-  vec2 shoulder = vec2(x, y);
-  vec2 tail = shoulder - vec2(0.024, 0.0);
-  float body = capsuleMask(auv, shoulder, tail, 0.007);
-
-  float flap = sin(uTime * 5.0 + uSeed) * 0.6;
-  vec2 dirL = normalize(vec2(-0.9, 0.3 + flap));
-  vec2 dirR = normalize(vec2(0.9, 0.3 + flap));
-  vec2 wingL = shoulder + dirL * 0.022;
-  vec2 wingR = shoulder + dirR * 0.022;
-  float wl = capsuleMask(auv, shoulder, wingL, 0.006);
-  float wr = capsuleMask(auv, shoulder, wingR, 0.006);
-  return vec3(body, wl, wr);
-}
-
-// Space mode: a bioluminescent alien moth drifting slowly through the
-// glowing grove, wings flapping gently with a pulsing self-glow.
-float mothMask(vec2 auv, float aspect, out vec2 center) {
-  float speed = 0.015;
-  float travel = fract(uTime * speed + uSeed * 6.0 + 0.3);
-  float xRange = aspect + 0.3;
-  float x = travel * xRange - 0.15;
-  float y = 0.5 + sin(uTime * 0.25 + uSeed * 3.0) * 0.1;
-  center = vec2(x, y);
-  float flap = sin(uTime * 3.0 + uSeed) * 0.4;
-  vec2 dirL = normalize(vec2(-0.7, 0.4 + flap));
-  vec2 dirR = normalize(vec2(0.7, 0.4 + flap));
-  float wl = capsuleMask(auv, center, center + dirL * 0.018, 0.008);
-  float wr = capsuleMask(auv, center, center + dirR * 0.018, 0.008);
-  float body = capsuleMask(auv, center, center - vec2(0.0, 0.012), 0.004);
-  return max(body, max(wl, wr));
-}
-
 void main() {
   vec2 uv = gl_FragCoord.xy / uResolution;
   float aspect = uResolution.x / uResolution.y;
@@ -115,23 +74,6 @@ void main() {
   // Space mode: upward-drifting bioluminescent spore motes.
   float motes = starField(auv * 3.0 + vec2(0.0, -uTime * 0.05), uSeed + 70.0, 0.02);
   col += vec3(0.55, 1.0, 0.90) * motes * uSpaceT;
-
-  // Creatures: a colorful macaw flying between the canopy gaps in normal
-  // mode, cross-fading to a bioluminescent alien moth (with a pulsing
-  // self-glow) in space mode.
-  vec3 macaw = macawMask(auv, aspect);
-  float macawFade = 1.0 - uSpaceT;
-  col = mix(col, vec3(0.85, 0.10, 0.08), macaw.x * macawFade);
-  col = mix(col, vec3(0.10, 0.35, 0.85), macaw.y * macawFade);
-  col = mix(col, vec3(0.95, 0.75, 0.10), macaw.z * macawFade);
-
-  vec2 mothCenter;
-  float mothM = mothMask(auv, aspect, mothCenter);
-  vec3 mothColor = vec3(0.60, 0.95, 0.85);
-  float mothPulse = 0.5 + 0.5 * sin(uTime * 1.5 + uSeed);
-  float mothGlow = exp(-length(auv - mothCenter) * 60.0) * 0.4 * mothPulse;
-  col += mothColor * mothGlow * uSpaceT;
-  col = mix(col, mothColor, mothM * uSpaceT);
 
   col += (hash21(gl_FragCoord.xy) - 0.5) / 255.0;
 

@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
+import { GiSchoolOfFish, GiSquid, GiSpermWhale, GiJellyfish } from 'react-icons/gi';
 import vertSource from '../shaders/landscape.vert?raw';
 import commonSource from '../shaders/common.glsl?raw';
 import themeFragSource from '../shaders/ocean.frag?raw';
 import { createSpaceRamp } from '../spaceRamp';
 import { getSceneSeed } from '../seed';
+import Creature from './Creature';
 import styles from './LandscapeBg.module.scss';
 import type { BackgroundThemeComponentProps } from '../backgrounds';
 
@@ -169,5 +171,35 @@ export default function OceanBg({ spaceMode = false }: BackgroundThemeComponentP
     drawRef.current?.();
   }, [spaceMode]);
 
-  return <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />;
+  return (
+    <>
+      <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
+      <Creature
+        Normal={GiSchoolOfFish}
+        Alien={GiSquid}
+        normalColor="#7fa8b8"
+        alienColor="#73f2e6"
+        spaceMode={spaceMode}
+        size={34}
+        top="58%"
+        duration={30}
+        motion="undulate"
+        glow
+      />
+      <Creature
+        Normal={GiSpermWhale}
+        Alien={GiJellyfish}
+        normalColor="#3d5a68"
+        alienColor="#a888ff"
+        spaceMode={spaceMode}
+        size={46}
+        top="66%"
+        duration={44}
+        motion="bob"
+        alienMotion="undulate"
+        reverse
+        glow
+      />
+    </>
+  );
 }

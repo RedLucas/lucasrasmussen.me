@@ -39,6 +39,15 @@ $sans:
     outline: 2px solid $accent;
     outline-offset: -3px;
   }
+
+  // Suppresses the ring only for App.tsx's initial focus-on-open call —
+  // see its own comment for why that scripted focus needs this on some
+  // browsers but not others. Doubled pseudo-class/attribute selector for
+  // specificity, so this reliably wins over the plain rule above
+  // regardless of source order.
+  &[data-just-opened]:focus-visible {
+    outline: none;
+  }
 }
 
 // Full-height wrapper so the margin rule and grain span the whole document
@@ -58,20 +67,21 @@ $sans:
   // A scored/embossed crease rather than a flat drawn line — a dark core
   // plus a light sliver on the trailing edge reads as pressed into the
   // paper and catching light, the way an actual ruled/cut sheet would.
+  // Two solid 1px strokes (core + a same-width, unblurred highlight offset
+  // beside it) rather than a gradient/blur across one sub-pixel-wide
+  // (1.5px) element: a horizontal gradient has no room to express its own
+  // transition within under 2px, and a blurred shadow adds unpredictable
+  // extra width — at real device pixel ratios that was rasterizing as one
+  // flat, oversaturated line instead of the intended subtle crease.
   &::before {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
     left: var(--rule-x);
-    width: 1.5px;
-    background: linear-gradient(
-      to right,
-      rgba(214, 67, 31, 0.34) 0%,
-      rgba(214, 67, 31, 0.34) 55%,
-      rgba(255, 255, 255, 0.4) 100%
-    );
-    box-shadow: 1px 0 1px rgba(36, 31, 27, 0.06);
+    width: 1px;
+    background: rgba(214, 67, 31, 0.34);
+    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.4);
   }
 
   &::after {

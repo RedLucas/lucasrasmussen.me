@@ -1,9 +1,11 @@
 import { useEffect, useRef } from 'react';
+import { GiCamel, GiSandSnake } from 'react-icons/gi';
 import vertSource from '../shaders/landscape.vert?raw';
 import commonSource from '../shaders/common.glsl?raw';
 import themeFragSource from '../shaders/desert.frag?raw';
 import { createSpaceRamp } from '../spaceRamp';
 import { getSceneSeed } from '../seed';
+import Creature from './Creature';
 import styles from './LandscapeBg.module.scss';
 import type { BackgroundThemeComponentProps } from '../backgrounds';
 
@@ -169,5 +171,22 @@ export default function DesertBg({ spaceMode = false }: BackgroundThemeComponent
     drawRef.current?.();
   }, [spaceMode]);
 
-  return <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />;
+  return (
+    <>
+      <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
+      <Creature
+        Normal={GiCamel}
+        Alien={GiSandSnake}
+        normalColor="#3a2a18"
+        alienColor="#8dff4f"
+        spaceMode={spaceMode}
+        size={40}
+        top="66%"
+        duration={38}
+        motion="bob"
+        alienMotion="undulate"
+        glow
+      />
+    </>
+  );
 }

@@ -109,24 +109,14 @@ float litSphereShade(vec2 uv, vec2 center, float radius, vec2 lightDir2D, float 
 
 // A tight, solid edge — composed from two normal-order smoothsteps (rather
 // than one reversed-order one, which GLSL leaves spec-ambiguous) so the
-// transition is well-defined on every platform.
-float hardDiscMask(vec2 uv, vec2 center, float radius) {
+// transition is well-defined on every platform. Sized in actual screen
+// pixels (via `resolution`, every theme's own uResolution uniform) rather
+// than a fixed percentage of the body's own radius: a percentage-of-radius
+// band is several pixels wide on a small moon and reads as a soft blur, but
+// a fixed ~1.5px band anti-aliases the same everywhere regardless of how
+// small the body is or how dense the display.
+float hardDiscMask(vec2 uv, vec2 center, float radius, vec2 resolution) {
   float dist = length(uv - center);
-  return 1.0 - smoothstep(radius * 0.94, radius * 1.04, dist);
-}
-
-// Distance from p to the segment a-b — the one shape every articulated
-// creature (wings, legs, fins, tentacles, bodies) below is built from.
-float sdSegment(vec2 p, vec2 a, vec2 b) {
-  vec2 pa = p - a;
-  vec2 ba = b - a;
-  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-  return length(pa - ba * h);
-}
-
-// Soft-edged capsule mask (radius r around segment a-b): 1 inside, 0
-// outside.
-float capsuleMask(vec2 p, vec2 a, vec2 b, float r) {
-  float d = sdSegment(p, a, b) - r;
-  return 1.0 - smoothstep(0.0, r * 0.6, d);
+  float pixel = 1.5 / resolution.y;
+  return 1.0 - smoothstep(radius - pixel, radius + pixel, dist);
 }
