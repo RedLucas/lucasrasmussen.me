@@ -1,0 +1,12 @@
+@use '../styles/variables' as *;
+
+.start {
+  position: fixed;
+  height: 37px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: $menu-background;
+  display: flex;
+  justify-content: space-between;
+}

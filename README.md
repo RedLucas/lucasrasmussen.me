@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/master.svg?style=svg)](https://circleci.com/gh/RedLucas/lucasrasmussen.me/tree/master)
 
-> A Vue.js project
+> A React + Vite project
 
 ## Build Setup
 
@@ -10,23 +10,26 @@
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8080
+# serve with hot reload at localhost:5173
 npm run dev
 
-# build for production with minification
+# build for production
 npm run build
 
-# build for production and view the bundle analyzer report
-npm run build --report
+# preview the production build locally
+npm run preview
 
-# run unit tests
-npm run unit
-
-# run e2e tests
-npm run e2e
-
-# run all tests
-npm test
+# lint
+npm run lint
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+## Background
+
+The background is a WebGL fragment shader that draws a procedural sunset
+landscape — layered ridge silhouettes under a graded sky. It's generated from a
+random seed on each load, so every visit gets a different scene, and it needs no
+API key, network request, or image asset. See `src/shaders/landscape.frag`.
+
+It respects `prefers-reduced-motion` (the scene renders but holds still), pauses
+while the tab is hidden, and falls back to the plain gradient if WebGL is
+unavailable.
