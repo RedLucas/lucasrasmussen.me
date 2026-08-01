@@ -1,3 +1,5 @@
+@use '../styles/variables' as *;
+
 .actions {
   display: flex;
   align-items: center;
@@ -12,4 +14,10 @@
   color: white;
   font-size: 1.5rem;
   line-height: 1;
+
+  // A persistent cue for toggles (space mode), beyond just the tooltip —
+  // the two other buttons here are one-shot actions and never get this.
+  &[aria-pressed='true'] {
+    color: $accent;
+  }
 }

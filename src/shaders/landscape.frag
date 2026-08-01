@@ -1,6 +1,7 @@
 // Procedural sunset landscape: layered ridge silhouettes under a graded sky.
-// Everything is generated from uSeed, so every page load is a different scene.
-precision highp float;
+// Everything is generated from uSeed, so every page load is a different
+// scene. Noise/fbm/ridge/celestial-body helpers live in common.glsl, which
+// LandscapeBg.jsx concatenates ahead of this source before compiling.
 
 uniform vec2 uResolution;
 uniform float uTime;
@@ -10,67 +11,11 @@ uniform float uSeed;
 // visitor at a given moment rather than randomized per load, and its drift
 // is slow enough to read as ambient rather than an obvious animation.
 uniform float uSunPhase;
+// 0 (normal) -> 1 (space mode): eased in JS, see LandscapeBg.jsx.
+uniform float uSpaceT;
 
 const int LAYERS = 6;
 const float HORIZON = 0.46;
-
-// --- noise -------------------------------------------------------------
-
-float hash11(float p) {
-  p = fract(p * 0.1031);
-  p *= p + 33.33;
-  p *= p + p;
-  return fract(p);
-}
-
-float hash21(vec2 p) {
-  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
-  p3 += dot(p3, p3.yzx + 33.33);
-  return fract((p3.x + p3.y) * p3.z);
-}
-
-float valueNoise(float x) {
-  float i = floor(x);
-  float f = fract(x);
-  float u = f * f * (3.0 - 2.0 * f);
-  return mix(hash11(i), hash11(i + 1.0), u);
-}
-
-float noise2(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(
-    mix(hash21(i), hash21(i + vec2(1.0, 0.0)), u.x),
-    mix(hash21(i + vec2(0.0, 1.0)), hash21(i + vec2(1.0, 1.0)), u.x),
-    u.y
-  );
-}
-
-// The 1 - |2n - 1| fold is what turns rolling hills into sharp ridge lines.
-float ridgeFbm(float x) {
-  float sum = 0.0;
-  float amp = 0.5;
-  for (int i = 0; i < 5; i++) {
-    float n = valueNoise(x);
-    n = 1.0 - abs(n * 2.0 - 1.0);
-    sum += n * amp;
-    x = x * 2.0 + 11.7;
-    amp *= 0.5;
-  }
-  return sum;
-}
-
-float fbm2(vec2 p) {
-  float sum = 0.0;
-  float amp = 0.5;
-  for (int i = 0; i < 5; i++) {
-    sum += noise2(p) * amp;
-    p = p * 2.0 + 17.0;
-    amp *= 0.5;
-  }
-  return sum;
-}
 
 // --- palette -----------------------------------------------------------
 
@@ -132,6 +77,12 @@ void main() {
   vec3 col = mix(pal.horizon, pal.mid, pow(sky, 0.55));
   col = mix(col, pal.zenith, pow(sky, 1.9));
 
+  // Space mode ("Binary Ember"): a faint magenta cast at the zenith and a
+  // scatter of stars wherever the sky is dark enough to show them.
+  col = mix(col, col + vec3(0.10, -0.02, 0.12) * sky, uSpaceT);
+  float starMask = smoothstep(0.35, 0.75, sky) * uSpaceT;
+  col += vec3(0.9, 0.92, 1.0) * starField(uv * vec2(aspect, 1.0), uSeed, 0.006) * starMask;
+
   // Sun, parked just above the horizon. Horizontal placement is still
   // per-load variety from the seed, but height follows a smooth, fast-forward
   // day cycle (see uSunPhase) so it's the same for every visitor watching at
@@ -139,10 +90,18 @@ void main() {
   float sunX = 0.22 + fract(uSeed * 7.31) * 0.56;
   float cycleHeight = 0.5 - 0.5 * cos(uSunPhase * 6.28318530718);
   float sunY = HORIZON + 0.015 + cycleHeight * 0.07;
-  vec2 sunUv = vec2((uv.x - sunX) * aspect, uv.y - sunY);
-  float sunDist = length(sunUv);
-  col += pal.sun * exp(-sunDist * 11.0) * 0.55;
-  col = mix(col, pal.sun, smoothstep(0.052, 0.040, sunDist));
+  vec2 sunCenter = vec2(sunX * aspect, sunY);
+  vec2 sunUv = vec2(uv.x * aspect, uv.y);
+  vec2 sun = celestialBody(sunUv, sunCenter, 0.046, 0.55);
+  col += pal.sun * sun.x;
+  col = mix(col, pal.sun, sun.y);
+
+  // Space mode: a second, smaller, redder companion sun fades in nearby.
+  vec2 companionCenter = sunCenter + vec2(0.10 * aspect, 0.05);
+  vec2 companion = celestialBody(sunUv, companionCenter, 0.026, 0.5);
+  vec3 companionColor = vec3(0.95, 0.18, 0.12);
+  col += companionColor * companion.x * uSpaceT;
+  col = mix(col, companionColor, companion.y * uSpaceT);
 
   // High cloud banding, drifting slower than anything on the ground.
   float cloud = fbm2(vec2(uv.x * aspect * 1.6 + uTime * 0.006 + uSeed * 5.0, uv.y * 3.4));

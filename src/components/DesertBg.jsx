@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import vertSource from '../shaders/landscape.vert?raw';
 import commonSource from '../shaders/common.glsl?raw';
-import themeFragSource from '../shaders/landscape.frag?raw';
+import themeFragSource from '../shaders/desert.frag?raw';
 import { createSpaceRamp } from '../spaceRamp.js';
 import styles from './LandscapeBg.module.scss';
 
@@ -9,23 +9,8 @@ import styles from './LandscapeBg.module.scss';
 // concatenates ahead of its own scene-specific source before compiling.
 const fragSource = `${commonSource}\n${themeFragSource}`;
 
-// Ridge silhouettes have hard edges, so full retina resolution is visibly
-// sharper than a plain gradient would justify — render at the device's
-// actual pixel density rather than downsampling. Capped at 3 purely as a
-// safety ceiling against pathological values (e.g. browser zoom inflating
-// devicePixelRatio well past what any real display panel uses).
+// See LandscapeBg.jsx's identical constant for the reasoning.
 const MAX_DPR = 3;
-// A stylized day, not a real 24-hour one — fast enough that the sun's drift
-// is noticeable within a normal page visit, slow enough to still read as
-// ambient rather than an obvious animation.
-const SUN_CYCLE_MS = 3 * 60 * 1000;
-
-// Phase of the current cycle elapsed (0..1) — real wall-clock time, not
-// performance.now(), so every visitor's sun sits at the same height at a
-// given moment regardless of when their own session started.
-function sunCyclePhase() {
-  return (Date.now() % SUN_CYCLE_MS) / SUN_CYCLE_MS;
-}
 
 function compile(gl, type, source) {
   const shader = gl.createShader(type);
@@ -46,8 +31,6 @@ function createProgram(gl) {
   gl.attachShader(program, vert);
   gl.attachShader(program, frag);
   gl.linkProgram(program);
-  // Attached shaders stay alive until the program is deleted, so they can be
-  // released as soon as the link succeeds.
   gl.deleteShader(vert);
   gl.deleteShader(frag);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -58,24 +41,14 @@ function createProgram(gl) {
   return program;
 }
 
-// If anything below fails the canvas is simply never painted. It stays
-// transparent, so the app's gradient shows through untouched — no state and
-// no fallback branch needed.
-export default function LandscapeBg({ spaceMode = false }) {
+// Same lifecycle shape as LandscapeBg.jsx (webgl2/webgl fallback,
+// reduced-motion, visibility pause, context-loss, full teardown) — this is a
+// blazing-midday scene rather than a day/night one, so there's no uSunPhase.
+export default function DesertBg({ spaceMode = false }) {
   const canvasRef = useRef(null);
-  // Read fresh inside the mount effect's rAF loop (which never re-runs while
-  // this component stays mounted) rather than closing over the prop's
-  // initial value — see createSpaceRamp's caller below.
   const spaceModeRef = useRef(spaceMode);
-  // Holds the mount effect's own `draw`, so the effect below can force one
-  // redraw right when spaceMode flips even if no rAF loop is running (e.g.
-  // reduced motion) — otherwise the canvas would just keep showing whatever
-  // it last drew until something else happened to trigger a frame.
   const drawRef = useRef(null);
 
-  // Writing a ref during render is disallowed (react-hooks/refs) — this
-  // effect is the safe place, and runs before the "force a redraw" effect
-  // below since effects commit in declaration order.
   useEffect(() => {
     spaceModeRef.current = spaceMode;
   }, [spaceMode]);
@@ -94,7 +67,6 @@ export default function LandscapeBg({ spaceMode = false }) {
     try {
       program = createProgram(gl);
     } catch {
-      // A driver that can't compile this leaves the gradient in place.
       return undefined;
     }
 
@@ -106,7 +78,6 @@ export default function LandscapeBg({ spaceMode = false }) {
     const uResolution = gl.getUniformLocation(program, 'uResolution');
     const uTime = gl.getUniformLocation(program, 'uTime');
     const uSeed = gl.getUniformLocation(program, 'uSeed');
-    const uSunPhase = gl.getUniformLocation(program, 'uSunPhase');
     const uSpaceT = gl.getUniformLocation(program, 'uSpaceT');
     const spaceT = createSpaceRamp(spaceModeRef.current);
 
@@ -129,14 +100,11 @@ export default function LandscapeBg({ spaceMode = false }) {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let frame = 0;
     let start = performance.now();
-    // Frozen time for reduced motion still renders the full scene, just
-    // without the drift.
     let elapsed = 0;
 
     const draw = () => {
       resize();
       gl.uniform1f(uTime, elapsed);
-      gl.uniform1f(uSunPhase, sunCyclePhase());
       gl.uniform1f(uSpaceT, spaceT(spaceModeRef.current));
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
@@ -154,13 +122,10 @@ export default function LandscapeBg({ spaceMode = false }) {
 
     const play = () => {
       if (frame || reduceMotion.matches || document.hidden) return;
-      // Rebase so the scene doesn't jump forward by however long we paused.
       start = performance.now() - elapsed * 1000;
       frame = requestAnimationFrame(loop);
     };
 
-    // Burning battery on an ambient background in a tab nobody is looking at
-    // is pure waste.
     const onVisibility = () => (document.hidden ? stop() : play());
     const onMotionChange = () => (reduceMotion.matches ? (stop(), draw()) : play());
     const onResize = () => {
@@ -194,8 +159,6 @@ export default function LandscapeBg({ spaceMode = false }) {
     };
   }, []);
 
-  // Forces a redraw the instant spaceMode changes, in case no rAF loop is
-  // currently running to pick it up on its own (see drawRef's comment above).
   useEffect(() => {
     drawRef.current?.();
   }, [spaceMode]);
