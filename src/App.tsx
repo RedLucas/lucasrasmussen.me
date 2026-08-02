@@ -136,15 +136,21 @@ export default function App() {
               <FontAwesomeIcon icon={faXmark} />
             </button>
           )}
-          {burning && (
-            <BurnTransition
-              sourceNodeRef={resumeRef}
-              onComplete={handleBurnComplete}
-              onReady={handleBurnReady}
-              durationMs={1600}
-            />
-          )}
         </div>
+      )}
+      {/* A sibling of .modal, not a child — .modal has overflow:hidden for
+          its ordinary (non-burning) layout, which would otherwise clip the
+          burn's smoke dead at the résumé's own edges. This canvas covers
+          the whole viewport instead and is told where the résumé itself
+          sits (see BurnTransition.tsx's uRect), so the paper still burns in
+          exactly the same place. */}
+      {burning && (
+        <BurnTransition
+          sourceNodeRef={resumeRef}
+          onComplete={handleBurnComplete}
+          onReady={handleBurnReady}
+          durationMs={1600}
+        />
       )}
       <Routes>
         <Route path="/" element={<Grid />} />

@@ -219,9 +219,14 @@ export default function BurnTransition({
         return;
       }
 
+      // The canvas covers the whole viewport, not just the résumé's own box
+      // (see BurnTransition.module.scss) — the modal it used to be sized to
+      // has overflow:hidden, which clipped the smoke dead at the paper's
+      // edges. uRect (below) tells the shader where that paper actually is
+      // within this larger canvas.
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const width = Math.max(1, Math.round(sourceNode.clientWidth * dpr));
-      const height = Math.max(1, Math.round(sourceNode.clientHeight * dpr));
+      const width = Math.max(1, Math.round(window.innerWidth * dpr));
+      const height = Math.max(1, Math.round(window.innerHeight * dpr));
       canvas.width = width;
       canvas.height = height;
 
@@ -248,6 +253,7 @@ export default function BurnTransition({
 
       const aPosition = gl.getAttribLocation(program, 'aPosition');
       const uResolution = gl.getUniformLocation(program, 'uResolution');
+      const uRect = gl.getUniformLocation(program, 'uRect');
       const uProgress = gl.getUniformLocation(program, 'uProgress');
       const uSeed = gl.getUniformLocation(program, 'uSeed');
       const uOrigin = gl.getUniformLocation(program, 'uOrigin');
@@ -267,13 +273,26 @@ export default function BurnTransition({
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.uniform1i(uTexture, 0);
 
-      // Runs past 1 so the fire has time to fully sweep every corner
-      // (worst case, for an ignition point in one corner, is just past 1.2)
-      // before burn.frag's own final dissolve (the last ~28% of this range)
-      // kicks in — smoke no longer decays on its own, so this cutoff is
-      // sized for "fire fully spread, then one clean fade," not "wait for
-      // per-pixel decay to finish."
-      const finishAt = 1.8;
+      // Where the résumé itself sits within this viewport-sized canvas, in
+      // the same bottom-up 0..1 space gl_FragCoord uses (getBoundingClientRect
+      // is top-down from the viewport, hence the y flip). Computed once,
+      // same as the canvas size above — this is a one-shot close transition,
+      // not something that needs to track a mid-burn window resize.
+      const nodeRect = sourceNode.getBoundingClientRect();
+      const rectX0 = (nodeRect.left * dpr) / width;
+      const rectX1 = ((nodeRect.left + nodeRect.width) * dpr) / width;
+      const rectY0 = 1 - ((nodeRect.top + nodeRect.height) * dpr) / height;
+      const rectY1 = 1 - (nodeRect.top * dpr) / height;
+      gl.uniform4f(uRect, rectX0, rectY0, rectX1, rectY1);
+
+      // Runs way past 1 so smoke keeps drifting long after the paper itself
+      // has fully burned away (which still finishes around progress 1, at
+      // the same pace as before) before burn.frag's own final dissolve (the
+      // last ~15% of this range) kicks in — smoke no longer decays on its
+      // own, so this cutoff is sized for "let it hang in the air for a
+      // while, then one clean fade," not "wait for per-pixel decay to
+      // finish."
+      const finishAt = 9;
       gl.uniform1f(uFinishAt, finishAt);
 
       const loop = (now: number) => {

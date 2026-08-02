@@ -42,6 +42,7 @@ export function createMockGLContext() {
     uniform1f: vi.fn(),
     uniform2f: vi.fn(),
     uniform2fv: vi.fn(),
+    uniform4f: vi.fn(),
     uniform1i: vi.fn(),
 
     // Textures.
