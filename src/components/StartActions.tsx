@@ -1,7 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShower, faRocket } from '@fortawesome/free-solid-svg-icons';
 import BackgroundMenu, { type BackgroundMenuTheme } from './BackgroundMenu';
-import CreditsMenu from './CreditsMenu';
 import styles from './StartActions.module.scss';
 
 function clearCache() {
@@ -42,7 +41,6 @@ export default function StartActions({
       >
         <FontAwesomeIcon icon={faRocket} />
       </button>
-      <CreditsMenu />
     </div>
   );
 }

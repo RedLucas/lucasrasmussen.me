@@ -1,0 +1,244 @@
+// Shared animation classes for every rigged creature below. Each creature
+// nests every animatable part as `<g transform="translate(pivotX,pivotY)">
+// <g className={styles.legA} style={{transformOrigin:'0 0'}}>...shape drawn
+// from local (0,0)...</g></g>` — the outer g's plain SVG `transform`
+// attribute places the pivot (a hip, a shoulder, a tail base) in the
+// overall coordinate space, and the inner g's CSS `transform` rotates
+// around that same local (0,0), so a part visibly pivots like a real joint
+// instead of the whole silhouette wobbling as one rigid shape.
+//
+// Only `transform` is animated here; each creature component is responsible
+// for not layering a second transform-animation on the exact same element
+// (the lesson from Creature.module.scss's own track/wander/icon split).
+
+// Two legs (or two leg-pairs, seen from the side) swinging in opposition —
+// a real diagonal quadruped gait, not a single symmetric bob. `-a` swings
+// forward while `-b` swings back, then they reverse.
+@keyframes legSwingA {
+  0%,
+  100% {
+    transform: rotate(16deg);
+  }
+
+  50% {
+    transform: rotate(-16deg);
+  }
+}
+
+@keyframes legSwingB {
+  0%,
+  100% {
+    transform: rotate(-16deg);
+  }
+
+  50% {
+    transform: rotate(16deg);
+  }
+}
+
+.legA {
+  animation: legSwingA 1.1s ease-in-out infinite;
+}
+
+.legB {
+  animation: legSwingB 1.1s ease-in-out infinite;
+}
+
+// A knee joint nested inside each leg (a second segment, translated to the
+// first segment's own end) — a single rigid leg swinging from one pivot
+// reads as a stiff pendulum, not a walk. The knee bends only during its
+// own leg's forward/lift half of the stride and stays straight through the
+// planted/push half, timed to the *same* 1.1s cycle as legSwingA/B so the
+// bend and the swing stay locked together.
+@keyframes kneeBendA {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(30deg);
+  }
+}
+
+@keyframes kneeBendB {
+  0%,
+  50%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  75% {
+    transform: rotate(30deg);
+  }
+}
+
+.kneeA {
+  animation: kneeBendA 1.1s ease-in-out infinite;
+}
+
+.kneeB {
+  animation: kneeBendB 1.1s ease-in-out infinite;
+}
+
+// A wingbeat: fast, deep downstroke, a slight overshoot on the recovery,
+// then a brief settle before the next beat — not a symmetric pulse. A left
+// wing (drawn extending toward -x from its shoulder) and a right wing
+// (drawn extending toward +x) need opposite-signed rotation to swing the
+// *same visual direction* together — a shared positive rotation angle
+// would lift one while dropping the other, like a seesaw, since they're
+// mirror images of each other. `.wing` is the left/base version; `.wingMirror`
+// carries the identical timing with every angle sign-flipped.
+@keyframes wingFlap {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  22% {
+    transform: rotate(-52deg);
+  }
+
+  45% {
+    transform: rotate(8deg);
+  }
+
+  70% {
+    transform: rotate(-6deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes wingFlapMirror {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  22% {
+    transform: rotate(52deg);
+  }
+
+  45% {
+    transform: rotate(-8deg);
+  }
+
+  70% {
+    transform: rotate(6deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.wing {
+  animation: wingFlap 0.6s infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wingMirror {
+  animation: wingFlapMirror 0.6s infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// A slower, gentler flap for gliding/soaring creatures (manta, wyvern)
+// rather than the quick wingbeat above.
+.wingSlow {
+  animation: wingFlap 1.6s infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wingSlowMirror {
+  animation: wingFlapMirror 1.6s infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// A tail fin swishing side to side to drive a swim stroke.
+@keyframes tailSwish {
+  0%,
+  100% {
+    transform: rotate(-22deg);
+  }
+
+  50% {
+    transform: rotate(22deg);
+  }
+}
+
+.tail {
+  animation: tailSwish 0.9s ease-in-out infinite;
+}
+
+// A trailing tentacle/appendage wave — each tentacle uses the same
+// keyframe but with its own animation-delay (set inline per instance) so
+// the wave visibly travels down the chain rather than every tentacle
+// moving in lockstep.
+@keyframes tentacleWave {
+  0%,
+  100% {
+    transform: rotate(-14deg);
+  }
+
+  50% {
+    transform: rotate(14deg);
+  }
+}
+
+.tentacle {
+  animation: tentacleWave 1.8s ease-in-out infinite;
+}
+
+// A body-segment undulation for serpentine creatures (the sandworm) —
+// alternating rotation per segment, each on its own delay, produces a
+// traveling S-curve down the chain.
+@keyframes segmentWave {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+.segment {
+  animation: segmentWave 1.4s ease-in-out infinite;
+}
+
+// A gentle bell pulse for jellyfish-style propulsion — contract, then
+// relax, unlike a limb's back-and-forth swing.
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(0.8);
+  }
+}
+
+.pulse {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legA,
+  .legB,
+  .kneeA,
+  .kneeB,
+  .wing,
+  .wingMirror,
+  .wingSlow,
+  .wingSlowMirror,
+  .tail,
+  .tentacle,
+  .segment,
+  .pulse {
+    animation: none;
+  }
+}

@@ -1,20 +1,34 @@
-import rochenImg from '../../assets/creatures/manta_swim.png';
-import Sprite from './Sprite';
+import rig from './rig.module.scss';
 import type { CreatureSvgProps } from './types';
 
-// A 4-frame side-profile swim cycle (CC-BY 4.0 stingray sheet) — the wings
-// genuinely undulate frame to frame. Rays glide with slow, graceful wing
-// undulation rather than a fast beat.
-export default function MantaRay({ size, style }: CreatureSvgProps) {
+// An alien sky-manta gliding through the aurora, in profile: broad, flat
+// wings spread above/below the body and undulate slowly together, with a
+// long thin tail trailing behind (left) as it glides rightward.
+export default function MantaRay({ size, color, style }: CreatureSvgProps) {
   return (
-    <Sprite
-      src={rochenImg}
-      frameWidth={69}
-      frameHeight={49}
-      frameCount={4}
-      size={size}
-      duration={2.2}
-      style={style}
-    />
+    <svg width={size} height={size} viewBox="0 0 100 60" style={style} fill={color}>
+      <g transform="translate(48,30)">
+        <g className={rig.wingSlow} style={{ transformOrigin: '0 0' }}>
+          <path d="M -4,0 L -14,-40 L 4,-36 L 8,-8 Z" />
+        </g>
+      </g>
+      <g transform="translate(48,30)">
+        <g className={rig.wingSlowMirror} style={{ transformOrigin: '0 0' }}>
+          <path d="M -4,0 L -14,40 L 4,36 L 8,8 Z" />
+        </g>
+      </g>
+
+      {/* Body and tail — static silhouette. */}
+      <ellipse cx="48" cy="30" rx="8" ry="8" />
+      <line
+        x1="41"
+        y1="31"
+        x2="16"
+        y2="38"
+        stroke={color}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
