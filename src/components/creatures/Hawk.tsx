@@ -9,12 +9,12 @@ export default function Hawk({ size, color, style }: CreatureSvgProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 60" style={style} fill={color}>
       <g transform="translate(46,30)">
-        <g className={rig.wing} style={{ transformOrigin: '0 0' }}>
+        <g className={rig.wingSlow} style={{ transformOrigin: '0 0' }}>
           <path d="M 0,0 L -8,-32 L 4,-26 L 8,-8 Z" />
         </g>
       </g>
       <g transform="translate(46,30)">
-        <g className={rig.wingMirror} style={{ transformOrigin: '0 0' }}>
+        <g className={rig.wingSlowMirror} style={{ transformOrigin: '0 0' }}>
           <path d="M 0,0 L -8,32 L 4,26 L 8,8 Z" />
         </g>
       </g>
