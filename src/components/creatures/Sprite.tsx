@@ -48,7 +48,9 @@ export default function Sprite({
         backgroundImage: `url(${src})`,
         backgroundRepeat: 'no-repeat',
         backgroundSize: animated ? `${frameCount * 100}% 100%` : '100% 100%',
-        animation: animated ? `spriteStep ${duration}s steps(${frameCount}) infinite` : undefined,
+        animation: animated
+          ? `${sprite.spriteStep} ${duration}s steps(${frameCount}) infinite`
+          : undefined,
         ...style,
       }}
     />

@@ -1,17 +1,20 @@
-// Global (unscoped) keyframe: Sprite.tsx sets animation-name via inline
-// style from a different file, so this can't be a module-local identifier
-// the way rig.module.scss's keyframes are — :global keeps the literal name
-// "spriteStep" in the compiled CSS so the inline style can reference it
-// directly.
-:global {
-  @keyframes spriteStep {
-    from {
-      background-position-x: 0%;
-    }
+// A plain module-scoped keyframe like every other one in this file — an
+// earlier version tried to keep this unscoped via a `:global {}` wrapper so
+// Sprite.tsx could reference the literal name "spriteStep" in an inline
+// style from a different file, but this project's CSS-modules processor
+// hashes @keyframes names regardless of that wrapper (confirmed in the
+// compiled output), so the inline style's animation-name never matched any
+// real keyframe and the frame-step animation silently never ran. The actual
+// working mechanism: CSS modules exports keyframe names on the default
+// import object exactly like class names, so Sprite.tsx imports the real
+// (hashed) name as `sprite.spriteStep` instead of hardcoding the string.
+@keyframes spriteStep {
+  from {
+    background-position-x: 0%;
+  }
 
-    to {
-      background-position-x: 100%;
-    }
+  to {
+    background-position-x: 100%;
   }
 }
 
