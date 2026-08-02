@@ -14,9 +14,9 @@ export default function Dove({ size, style }: CreatureSvgProps) {
       src={birdImg}
       frameWidth={46}
       frameHeight={32}
-      frameCount={9}
+      frameCount={4}
       size={size}
-      duration={0.45}
+      duration={0.22}
       style={{ filter: 'hue-rotate(190deg) saturate(0.7) brightness(1.1)', ...style }}
     />
   );
