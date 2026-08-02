@@ -1,37 +1,44 @@
-import rig from './rig.module.scss';
+import fishImg from '../../assets/creatures/fish.png';
+import Sprite from './Sprite';
+import sprite from './sprite.module.scss';
 import type { CreatureSvgProps } from './types';
 
 interface FishProps {
-  x: number;
-  y: number;
+  left: number;
+  top: number;
   scale: number;
-  color: string;
   delay: string;
 }
 
-// One small fish: an oval body with a triangular tail swishing from its
-// own base — the building block FishSchool repeats a few times.
-function Fish({ x, y, scale, color, delay }: FishProps) {
+// No swim-cycle frames for this particular fish tile (it's one static pose
+// out of a large color/accessory variant pack, not an authored animation) —
+// each instance gets its own small side-to-side sway, staggered so the trio
+// doesn't read as identical clones moving in lockstep. Small fish dart with
+// quick, twitchy tail beats, not a slow drift.
+function Fish({ left, top, scale, delay }: FishProps) {
   return (
-    <g transform={`translate(${x},${y}) scale(${scale})`}>
-      <g transform="translate(-2,0)">
-        <g className={rig.tail} style={{ transformOrigin: '0 0', animationDelay: delay }}>
-          <path d="M 0,0 L -11,-6 L -11,6 Z" fill={color} />
-        </g>
-      </g>
-      <ellipse cx="8" cy="0" rx="10" ry="5" fill={color} />
-    </g>
+    <div
+      style={{
+        position: 'absolute',
+        left: `${left}%`,
+        top: `${top}%`,
+        transform: `scale(${scale})`,
+      }}
+    >
+      <div className={sprite.swayFast} style={{ animationDelay: delay }}>
+        <Sprite src={fishImg} frameWidth={60} frameHeight={56} frameCount={1} size={22} />
+      </div>
+    </div>
   );
 }
 
-// A loose school of three fish, each swishing its own tail on a slightly
-// different delay so they don't read as identical clones.
-export default function FishSchool({ size, color, style }: CreatureSvgProps) {
+// A loose school of three fish (CC0) at different positions/scales/delays.
+export default function FishSchool({ size, style }: CreatureSvgProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 60" style={style}>
-      <Fish x={30} y={22} scale={1} color={color} delay="0s" />
-      <Fish x={54} y={34} scale={0.8} color={color} delay="-0.25s" />
-      <Fish x={22} y={40} scale={0.7} color={color} delay="-0.5s" />
-    </svg>
+    <div style={{ position: 'relative', width: size * 1.6, height: size, ...style }}>
+      <Fish left={5} top={10} scale={1} delay="0s" />
+      <Fish left={45} top={35} scale={0.8} delay="-0.25s" />
+      <Fish left={20} top={55} scale={0.7} delay="-0.5s" />
+    </div>
   );
 }

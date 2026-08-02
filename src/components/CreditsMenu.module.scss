@@ -1,0 +1,63 @@
+@use '../styles/variables' as *;
+
+.wrapper {
+  position: relative;
+}
+
+// Same icon-button look as StartActions.module.scss's `.action`.
+.trigger {
+  background: none;
+  border: none;
+  padding: 0 0.25rem;
+  cursor: pointer;
+  color: white;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+// Same frosted-glass popover language as BackgroundMenu.module.scss's
+// `.menu`, just wider to fit prose rather than a single-column item list.
+.panel {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  right: 0;
+  width: 20rem;
+  max-width: calc(100vw - 2rem);
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  background-color: rgba(8, 8, 8, 0.88);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .panel {
+    background-color: rgba(8, 8, 8, 0.96);
+  }
+}
+
+.intro {
+  margin: 0 0 0.5rem;
+  line-height: 1.4;
+}
+
+.list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  a {
+    color: $accent;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: none;
+    }
+  }
+}

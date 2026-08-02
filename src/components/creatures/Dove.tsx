@@ -1,26 +1,23 @@
-import rig from './rig.module.scss';
+import birdImg from '../../assets/creatures/bird_fly.png';
+import Sprite from './Sprite';
 import type { CreatureSvgProps } from './types';
 
-// A flying dove/bird, in profile: same synchronized wing-pair rig as the
-// hawk, body horizontal and facing right, with a small fanned tail behind.
-export default function Dove({ size, color, style }: CreatureSvgProps) {
+// Reuses the same flying bird sheet as Hawk — no dedicated dove/hawk pair
+// turned up under an open license, and the two never appear on screen
+// together (different theme, different biome), so sharing the asset is
+// harmless. A slight hue shift keeps it visually distinct on its own
+// merits. Unlike the hawk, a small bird like this beats its wings quickly
+// and continuously rather than gliding.
+export default function Dove({ size, style }: CreatureSvgProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 60" style={style} fill={color}>
-      <g transform="translate(48,30)">
-        <g className={rig.wing} style={{ transformOrigin: '0 0' }}>
-          <path d="M 0,0 L -7,-30 L 4,-24 L 6,-7 Z" />
-        </g>
-      </g>
-      <g transform="translate(48,30)">
-        <g className={rig.wingMirror} style={{ transformOrigin: '0 0' }}>
-          <path d="M 0,0 L -7,30 L 4,24 L 6,7 Z" />
-        </g>
-      </g>
-
-      {/* Body, head, tail — static silhouette. */}
-      <ellipse cx="48" cy="30" rx="13" ry="8" />
-      <circle cx="65" cy="28" r="6.5" />
-      <path d="M 32,24 L 20,30 L 32,36 Z" />
-    </svg>
+    <Sprite
+      src={birdImg}
+      frameWidth={66}
+      frameHeight={32}
+      frameCount={8}
+      size={size}
+      duration={0.45}
+      style={{ filter: 'hue-rotate(190deg) saturate(0.7) brightness(1.1)', ...style }}
+    />
   );
 }

@@ -1,0 +1,81 @@
+// Global (unscoped) keyframe: Sprite.tsx sets animation-name via inline
+// style from a different file, so this can't be a module-local identifier
+// the way rig.module.scss's keyframes are — :global keeps the literal name
+// "spriteStep" in the compiled CSS so the inline style can reference it
+// directly.
+:global {
+  @keyframes spriteStep {
+    from {
+      background-position-x: 0%;
+    }
+
+    to {
+      background-position-x: 100%;
+    }
+  }
+}
+
+// A stable class name to hang the reduced-motion override on — inline
+// styles can't be overridden by a plain @media rule, but a stylesheet rule
+// with !important still beats them.
+.animated {
+  animation-name: spriteStep;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+}
+
+// For the two creatures with no source walk/swim cycle at all (Camel, the
+// single fish tile) — a plain static image drifting across the screen with
+// zero internal motion reads as a frozen sticker, so it gets a small bob or
+// sway of its own instead of the frame-stepping above.
+@keyframes idleBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes idleSway {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+
+  50% {
+    transform: rotate(6deg);
+  }
+}
+
+.bob {
+  animation: idleBob 0.6s ease-in-out infinite;
+}
+
+// A camel's rolling plod is much slower than the default bob.
+.bobSlow {
+  animation: idleBob 1.4s ease-in-out infinite;
+}
+
+.sway {
+  animation: idleSway 0.8s ease-in-out infinite;
+}
+
+// A small fish darts with quick, twitchy tail beats.
+.swayFast {
+  animation: idleSway 0.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated,
+  .bob,
+  .bobSlow,
+  .sway,
+  .swayFast {
+    animation: none !important;
+  }
+}
