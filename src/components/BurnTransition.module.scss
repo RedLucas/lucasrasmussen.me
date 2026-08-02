@@ -1,10 +1,16 @@
+// Covers the whole viewport rather than just the modal's own box — the
+// résumé's paper still burns in exactly the same place (see burn.frag's
+// uRect), but smoke can now drift past the modal's edges instead of being
+// clipped by its overflow:hidden. A sibling of .modal in App.tsx, not a
+// child of it, precisely so that clipping never applies here.
 .canvas {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
   display: block;
-  // Above .close (z-index: 2) — occludes the (now-hidden) live resume and
+  // Purely visual — never intercepts clicks meant for the taskbar or
+  // whatever's beneath it, even while it's covering the whole screen.
+  pointer-events: none;
+  // Above .modal (z-index: 1) — occludes the (now-hidden) live resume and
   // the modal's own background purely through paint order.
-  z-index: 3;
+  z-index: 2;
 }

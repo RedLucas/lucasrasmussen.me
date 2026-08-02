@@ -11,13 +11,22 @@
 // The fire radiates outward from a random point on the page (uOrigin)
 // rather than sweeping edge to edge, and the paper warps/darkens slightly
 // just ahead of the front to read as curling away rather than dissolving flat.
+//
+// This canvas now covers the whole viewport rather than just the résumé's
+// own box (see BurnTransition.tsx) so smoke can drift beyond the paper's
+// edges instead of being clipped by the modal's overflow:hidden. uRect is
+// where that paper actually lives within this larger canvas (0..1, in the
+// same bottom-up space as gl_FragCoord) — the fire/char/paper logic below
+// only ever runs inside it, exactly as when the canvas was rect-sized, and
+// everything outside it is smoke (or nothing) drifting across open space.
 precision highp float;
 
 uniform sampler2D uTexture;
 uniform vec2 uResolution;
+uniform vec4 uRect; // paper's on-screen box within this canvas: x0,y0,x1,y1
 uniform float uProgress; // 0 (untouched) -> past 1 (fully gone)
 uniform float uSeed;
-uniform vec2 uOrigin; // ignition point, plain 0..1 uv space
+uniform vec2 uOrigin; // ignition point, plain 0..1 uv space within uRect
 uniform float uFinishAt; // matches BurnTransition.jsx's completion cutoff
 
 // --- noise (ported from landscape.frag) ---------------------------------
@@ -50,17 +59,63 @@ float fbm2(vec2 p) {
   return sum;
 }
 
+// Smoke: a thick wispy trail that rises just behind the char front and
+// stays fully present — no per-pixel decay — so every burn visibly leaves
+// smoke hanging in the air instead of watching it dissipate mid-animation.
+// `front`/`dist` are the same radial burn-front values as the paper itself
+// uses, just evaluated arbitrarily far outside uRect too (auv is a plain
+// affine extension of the paper's own coordinate space — see main()) so the
+// smoke can keep drifting past the paper's edges rather than stopping dead
+// at them. `reachMask` is what keeps that from turning into full-screen fog:
+// past a couple of paper-diagonals from the ignition point, smoke is masked
+// out entirely regardless of how long the burn has been running.
+vec4 smokeAt(vec2 auv, float dist, float front) {
+  float age = -dist;
+  float envelope = smoothstep(0.0, 0.04, age);
+  vec2 driftUv = auv * 5.0 + vec2(0.6, -1.0) * (age + uProgress * 0.6) + uSeed * 23.0;
+  float wisp = fbm2(driftUv);
+  wisp = smoothstep(0.35, 0.75, wisp);
+  float smokeAlpha = envelope * wisp * 0.55;
+
+  float smokeReach = 1.8;
+  float reachMask = 1.0 - smoothstep(smokeReach * 0.6, smokeReach, front);
+  smokeAlpha *= reachMask;
+
+  // Only smoke gets an explicit end fade, and only right at the very end —
+  // char is left alone, since it already burns down to fully transparent on
+  // its own as the front sweeps past. Fading the whole scene together,
+  // including paper that had already fully burnt away, read as the picture
+  // itself dissolving rather than the fire still working — smoke is the
+  // only thing here that doesn't clear on its own.
+  float smokeFade = smoothstep(uFinishAt * 0.85, uFinishAt, uProgress);
+  smokeAlpha *= 1.0 - smokeFade;
+
+  return vec4(0.5, 0.49, 0.47, smokeAlpha);
+}
+
 void main() {
   vec2 uv = gl_FragCoord.xy / uResolution;
-  float aspect = uResolution.x / uResolution.y;
-  vec2 auv = vec2(uv.x * aspect, uv.y);
-  vec2 origin = vec2(uOrigin.x * aspect, uOrigin.y);
+
+  // Remap into the paper's own 0..1 space (matching exactly what `uv` was
+  // before this canvas grew to cover the whole viewport) — this extends
+  // linearly outside uRect rather than clamping, so distances computed from
+  // it stay physically continuous right across the paper's edges.
+  vec2 rectMin = uRect.xy;
+  vec2 rectMax = uRect.zw;
+  vec2 texUv = (uv - rectMin) / (rectMax - rectMin);
+  bool insideRect = texUv.x >= 0.0 && texUv.x <= 1.0 && texUv.y >= 0.0 && texUv.y <= 1.0;
+
+  float rectAspect =
+    ((rectMax.x - rectMin.x) * uResolution.x) / ((rectMax.y - rectMin.y) * uResolution.y);
+  vec2 auv = vec2(texUv.x * rectAspect, texUv.y);
+  vec2 origin = vec2(uOrigin.x * rectAspect, uOrigin.y);
 
   // Radial distance from the random ignition point, normalized against the
-  // full diagonal so progress reaches every corner regardless of where the
-  // origin happens to land — this is what gives the burn an expanding front
-  // from a single point rather than a sweep from one edge to another.
-  float diag = length(vec2(aspect, 1.0));
+  // paper's own diagonal so progress reaches every corner of it regardless
+  // of where the origin happens to land — this is what gives the burn an
+  // expanding front from a single point rather than a sweep from one edge
+  // to another.
+  float diag = length(vec2(rectAspect, 1.0));
   float front = length(auv - origin) / diag;
 
   // A coarse layer roughens the front's shape; a finer layer breaks up its
@@ -72,6 +127,17 @@ void main() {
   // Positive: not yet burned. Negative: already gone.
   float dist = (front + roughness) - uProgress;
   float edgeWidth = 0.075;
+
+  if (!insideRect) {
+    // Nothing to burn out here — just smoke that's already drifted this
+    // far, or empty space it hasn't reached yet.
+    if (dist > 0.0) {
+      gl_FragColor = vec4(0.0);
+      return;
+    }
+    gl_FragColor = smokeAt(auv, dist, front);
+    return;
+  }
 
   // Curl: just ahead of the front, warp the sampled texture coordinate
   // toward the ignition point and darken slightly, so the paper reads as
@@ -86,7 +152,7 @@ void main() {
   vec2 curlPerp = vec2(-curlDir.y, curlDir.x);
   float wobble = (fbm2(auv * 6.0 + uSeed * 19.0) - 0.5) * 0.6;
   vec2 curlOffset = (-curlDir + curlPerp * wobble) * curlT * 0.045;
-  vec2 sampleUv = clamp(uv + vec2(curlOffset.x / aspect, curlOffset.y), 0.0, 1.0);
+  vec2 sampleUv = clamp(texUv + vec2(curlOffset.x / rectAspect, curlOffset.y), 0.0, 1.0);
 
   vec4 src = texture2D(uTexture, sampleUv);
   src.rgb *= 1.0 - curlT * 0.35;
@@ -120,30 +186,17 @@ void main() {
   vec3 charColor = mix(vec3(0.05, 0.03, 0.02), vec3(0.0), charT);
   float charAlpha = src.a * (1.0 - smoothstep(0.0, 1.0, charT));
 
-  // Smoke: a thick wispy trail that rises just behind the char front and
-  // stays fully present — no per-pixel decay — so every burn visibly leaves
-  // smoke hanging in the air instead of watching it dissipate mid-animation.
-  // `age` is how far past the front this pixel sits, used only to fade the
-  // smoke *in* quickly once it ignites, not to fade it back out again.
-  float age = -dist;
-  float envelope = smoothstep(0.0, 0.04, age);
-  vec2 driftUv = auv * 5.0 + vec2(0.6, -1.0) * (age + uProgress * 0.6) + uSeed * 23.0;
-  float wisp = fbm2(driftUv);
-  wisp = smoothstep(0.35, 0.75, wisp);
-  float smokeAlpha = envelope * wisp * 0.55;
-  vec3 smokeColor = vec3(0.5, 0.49, 0.47);
-
-  // Only smoke gets an explicit end fade, and only right at the very end —
-  // char is left alone, since it already burns down to fully transparent on
-  // its own as the front sweeps past (see charAlpha above). Fading the whole
-  // scene together, including paper that had already fully burnt away, read
-  // as the picture itself dissolving rather than the fire still working —
-  // smoke is the only thing here that doesn't clear on its own.
-  float smokeFade = smoothstep(uFinishAt * 0.85, uFinishAt, uProgress);
-  smokeAlpha *= 1.0 - smokeFade;
-
-  vec3 finalColor = mix(charColor, smokeColor, smokeAlpha);
-  float finalAlpha = max(charAlpha, smokeAlpha);
+  // Proper (non-premultiplied) "smoke over char" compositing rather than a
+  // plain mix() weighted only by smoke.a — that would keep pulling the
+  // result toward charColor even once charAlpha has faded to ~0, leaving a
+  // visible dark seam right at the paper's edge where this blends against
+  // the outside-rect branch's pure smoke (see smokeAt/main above), which
+  // has no char layer to tint it.
+  vec4 smoke = smokeAt(auv, dist, front);
+  float finalAlpha = smoke.a + charAlpha * (1.0 - smoke.a);
+  vec3 finalColor = finalAlpha > 0.0001
+    ? (smoke.rgb * smoke.a + charColor * charAlpha * (1.0 - smoke.a)) / finalAlpha
+    : vec3(0.0);
 
   gl_FragColor = vec4(finalColor, finalAlpha);
 }
