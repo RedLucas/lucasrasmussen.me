@@ -1,0 +1,77 @@
+// A minimal rig for just Hawk/Dove's wing pair — reverted from sprite art
+// back to smooth CSS-rotated SVG wings since no free sprite sheet turned up
+// with more than 4 distinct wing positions (a hard "snap" no matter how the
+// frames are sliced). Every other creature stays pixel-art.
+//
+// A wingbeat: fast, deep downstroke, a slight overshoot on the recovery,
+// then a brief settle before the next beat — not a symmetric pulse. A left
+// wing (drawn extending toward -x from its shoulder) and a right wing
+// (drawn extending toward +x) need opposite-signed rotation to swing the
+// *same visual direction* together — a shared positive rotation angle
+// would lift one while dropping the other, since they're mirror images of
+// each other. `.wing` is the left/base version; `.wingMirror` carries the
+// identical timing with every angle sign-flipped. Duration is set per
+// instance via inline `animationDuration` (Hawk glides slowly, Dove
+// flutters fast) rather than fixed here.
+@keyframes wingFlap {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  22% {
+    transform: rotate(-52deg);
+  }
+
+  45% {
+    transform: rotate(8deg);
+  }
+
+  70% {
+    transform: rotate(-6deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes wingFlapMirror {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  22% {
+    transform: rotate(52deg);
+  }
+
+  45% {
+    transform: rotate(-8deg);
+  }
+
+  70% {
+    transform: rotate(6deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.wing {
+  animation-name: wingFlap;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wingMirror {
+  animation-name: wingFlapMirror;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wing,
+  .wingMirror {
+    animation: none !important;
+  }
+}
