@@ -11,9 +11,9 @@ export default function Hawk({ size, style }: CreatureSvgProps) {
   return (
     <Sprite
       src={birdImg}
-      frameWidth={66}
+      frameWidth={46}
       frameHeight={32}
-      frameCount={8}
+      frameCount={9}
       size={size}
       duration={1.8}
       style={style}

@@ -2,13 +2,12 @@
 // silhouettes reusing the same ridgeFbm height-field technique as every
 // other theme's foreground (sunset's mountains, desert's dunes, tundra's
 // ice horizon), just tuned for the lumpy rounded-crown look of a canopy
-// rather than jagged peaks — under a lush, sun-dappled green sky, with a
-// river running along the ground in front of the nearest trees.
+// rather than jagged peaks — under a lush green sky.
 // Noise/fbm/ridge/celestial-body/starField helpers live in common.glsl,
 // concatenated ahead of this source (see RainforestBg.tsx). Space mode
-// ("Bioluminescent Grove") recolors the canopy to glowing cyan/violet,
-// turns the river bioluminescent, adds upward-drifting spore motes, and
-// reveals a striped alien gas giant above the treeline.
+// ("Bioluminescent Grove") recolors the canopy to glowing cyan/violet, adds
+// upward-drifting spore motes, and reveals a striped alien gas giant above
+// the treeline.
 
 uniform vec2 uResolution;
 uniform float uTime;
@@ -17,7 +16,6 @@ uniform float uSpaceT; // 0 (normal) -> 1 (space mode), eased in JS
 
 const int LAYERS = 6;
 const float HORIZON = 0.62;
-const float RIVER_HEIGHT = 0.10;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / uResolution;
@@ -48,18 +46,6 @@ void main() {
   // Space mode stars, only where the sky is dark enough to show them.
   float starMask = smoothstep(0.3, 0.7, sky) * uSpaceT;
   col += vec3(0.85, 0.9, 1.0) * starField(auv, uSeed, 0.012) * starMask;
-
-  // Sunbeams filtering down through canopy gaps, brightest just above the
-  // treeline.
-  float beam = fbm2(vec2(auv.x * 3.0 + uSeed * 6.0, uv.y * 1.2 - uTime * 0.01));
-  // Normal-order smoothstep calls only (see common.glsl's own note on why a
-  // reversed-argument call is spec-ambiguous): rise from the treeline, then
-  // a separate falloff subtracted back out rather than one reversed call.
-  float beamBand =
-    smoothstep(HORIZON - 0.3, HORIZON, uv.y) * (1.0 - smoothstep(HORIZON + 0.06, HORIZON + 0.33, uv.y));
-  float beamMask = smoothstep(0.5, 0.8, beam) * beamBand;
-  vec3 beamColor = mix(vec3(1.0, 0.98, 0.75), vec3(0.55, 0.9, 0.95), uSpaceT);
-  col += beamColor * beamMask * mix(0.35, 0.6, uSpaceT);
 
   // Space mode: a striped alien gas giant, hanging above the treeline.
   vec2 planetCenter = vec2(0.70 * aspect, 0.85);
@@ -92,18 +78,6 @@ void main() {
       canopy *= 0.88 + 0.12 * smoothstep(base - amp, h, uv.y);
       col = canopy;
     }
-  }
-
-  // A river along the ground, in front of even the nearest canopy layer —
-  // a flat band with animated glint streaks standing in for sunlight on
-  // moving water.
-  float riverBase = RIVER_HEIGHT + 0.015 * ridgeFbm(auv.x * 1.5 + uSeed * 21.0);
-  if (uv.y < riverBase) {
-    vec3 riverColor = mix(vec3(0.10, 0.30, 0.36), vec3(0.05, 0.45, 0.55), uSpaceT);
-    float glint = fbm2(vec2(auv.x * 8.0 - uTime * 0.25, uv.y * 20.0 + uSeed * 9.0));
-    float glintMask = smoothstep(0.55, 0.75, glint);
-    vec3 glintColor = mix(vec3(0.85, 0.95, 0.85), vec3(0.5, 1.0, 0.9), uSpaceT);
-    col = mix(riverColor, glintColor, glintMask * 0.5);
   }
 
   // Space mode: upward-drifting bioluminescent spore motes.

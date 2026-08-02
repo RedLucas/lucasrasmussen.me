@@ -12,9 +12,9 @@ export default function Dove({ size, style }: CreatureSvgProps) {
   return (
     <Sprite
       src={birdImg}
-      frameWidth={66}
+      frameWidth={46}
       frameHeight={32}
-      frameCount={8}
+      frameCount={9}
       size={size}
       duration={0.45}
       style={{ filter: 'hue-rotate(190deg) saturate(0.7) brightness(1.1)', ...style }}
